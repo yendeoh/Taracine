@@ -52,7 +52,7 @@
     </nav>
     <div class="topbar__right">
       <a class="pill" href="index.html#cinemas" id="cinema-pill" title="Your cinema"><svg class="icon"><use href="#i-pin"/></svg><span class="long">Taracine </span><span id="cinema-pill-name">Cubao</span></a>
-      <a class="pill sign" href="#" id="sign-in"><svg class="icon"><use href="#i-user"/></svg>Sign in</a>
+      <a class="pill sign" href="login.html" id="sign-in" data-nav="login"><svg class="icon"><use href="#i-user"/></svg>Sign in</a>
     </div>
   </div>
 </header>
@@ -88,7 +88,7 @@
       <div class="picker__row"><div class="label">Cinema <span id="cinema-address"></span></div><div class="scroll" id="cinema-pills" role="group" aria-label="Cinema"></div></div>
       <div class="picker__row"><div class="label">Day</div><div class="dates" id="dates" role="group" aria-label="Day"></div></div>
       <div class="picker__row"><div class="label">Format <span>Highlight one to compare</span></div><div class="chips" id="format-filter" role="group" aria-label="Format"></div></div>
-      <div class="picker__row"><div class="label">Time</div><div class="sessions" id="sessions"></div>
+      <div class="picker__row"><div class="label" id="time-label">Time</div><div class="sessions" id="sessions"></div>
         <p class="legend" id="legend"><span><i class="k-next"></i>Next show</span><span><i class="k-past"></i>Already started</span><span><i class="k-sold"></i>Sold out</span></p>
       </div>
     </div>
@@ -102,6 +102,7 @@
       <div class="picker__row">
         <div class="label">Seats</div>
         <div class="qty"><button type="button" id="qty-minus" aria-label="Fewer seats"><svg class="icon"><use href="#i-minus"/></svg></button><output id="qty" aria-live="polite">2</output><button type="button" id="qty-plus" aria-label="More seats"><svg class="icon"><use href="#i-plus"/></svg></button></div>
+        <p class="seats-line">Seats <b id="seats-list"></b></p>
         <p class="muted" id="qty-note" style="font-size:.9375rem"></p>
         <p class="state" id="hold-state" hidden><svg class="icon"><use href="#i-check"/></svg><span></span></p>
       </div>
@@ -140,7 +141,7 @@
         </div>
       </div>
       <div><h3>Watch</h3><ul><li><a href="movies.html">Now showing</a></li><li><a href="movies.html#soon">Coming soon</a></li><li><a href="index.html#experience">Screen formats</a></li><li><a href="index.html#cinemas">Find a cinema</a></li></ul></div>
-      <div><h3>Club</h3><ul><li><a href="index.html#club">Taracine Club</a></li><li><a href="index.html#club">Cinema Points</a></li><li><a href="#">Sign up</a></li><li><a href="#">Gift tickets</a></li></ul></div>
+      <div><h3>Club</h3><ul><li><a href="index.html#club">Taracine Club</a></li><li><a href="index.html#club">Cinema Points</a></li><li><a href="login.html">Sign in</a></li><li><a href="#">Gift tickets</a></li></ul></div>
       <div><h3>Help</h3><ul><li><a href="#">Contact us</a></li><li><a href="#">FAQs</a></li><li><a href="#">Private screenings</a></li><li><a href="#">Advertise with us</a></li></ul></div>
     </div>
     <p class="notice"><svg class="icon"><use href="#i-info"/></svg><span>Portfolio study modeled on a national cinema chain's site structure. Every film, cinema, price and perk here is fictional.</span></p>
@@ -153,7 +154,7 @@
   <a href="movies.html" data-nav="movies"><svg class="icon"><use href="#i-film"/></svg>Movies</a>
   <a href="index.html#cinemas" data-nav="cinemas"><svg class="icon"><use href="#i-pin"/></svg>Cinemas</a>
   <a href="#" id="tab-tickets"><svg class="icon"><use href="#i-ticket"/></svg>Tickets</a>
-  <a href="#" id="tab-account"><svg class="icon"><use href="#i-user"/></svg>Account</a>
+  <a href="login.html" id="tab-account" data-nav="login"><svg class="icon"><use href="#i-user"/></svg>Account</a>
 </nav>
 
 <script src="assets/js/data.js"></script>

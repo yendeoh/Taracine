@@ -23,7 +23,14 @@ colors:
   restricted: "#B3261E"
   on-ink-muted: "#B8BCC4"
   underline-rest: "#C7CBD2"
+  placeholder: "#9AA0A8"
+  invalid-soft: "#FFF5F4"
+  warn-icon: "#C76A00"
 typography:
+  code:
+    fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace"
+    fontSize: "0.8125rem"
+    fontWeight: 400
   display:
     fontFamily: "Lexend, system-ui, -apple-system, Segoe UI, Roboto, sans-serif"
     fontSize: "clamp(2rem, 1.3rem + 2.4vw, 3rem)"
@@ -491,3 +498,16 @@ A single inline SVG sprite of 24-unit stroke icons at 20px, 1.75 stroke, round c
 - **Don't** use toasts, modals, or snackbars; hold confirmations, trailer notes, and warnings print inline.
 - **Don't** animate anything at rest or on page load; only the continue bar enters, and only in response to a selection.
 - **Don't** switch grids to auto-fill; columns are fixed per breakpoint (5/4/2 tiles, 4/2 formats, 2/1 cinemas, 7/4 dates).
+
+## Forms (added after the first record)
+
+The sign-in page (`login.html`) introduces text inputs and checkboxes. They follow the same vocabulary as every other control: hairline borders, 14px radius, 52px height, ink focus border with the orange focus ring, no shadows.
+
+- **Text input** `.input`: 52px tall, `--line` border, 14px radius, 16px side padding, placeholder `#9AA0A8`. Hover border `#C7CBD2`; focus border `--ink`; `.invalid` border `#B3261E` on `#FFF5F4`; `.valid` border `--ok`.
+- **Field message** `.msg`: 0.8125rem under the field, reserved height so the layout never jumps. `.msg.error` is `#B3261E` 500; `.msg.valid-message` is `--ok-ink` 500 and reads "Looks good."
+- **Checkbox row** `.check`: 44px tall tap target, 20px native checkbox tinted with `accent-color: --accent`, label text 0.9375rem.
+- **Form state** reuses `.state` (info, success, warn) printed inline under the button; no toasts, no modals.
+- **Seats line** `.seats-line` in the Tickets step prints the seat array ("H9, H10") in ink 600 beside a `--mid` label.
+- **Perks list** `.perks`: disc list, 0.875rem `--mid`, used in the format cards and the sign-in aside.
+
+The orange ration is unchanged: the only orange on the sign-in page is the Login button and the checkbox tint when checked.

@@ -1,6 +1,43 @@
 /* Taracine demo data. Everything here is fictional: films, cinemas, prices, perks.
-   Authored for a portfolio study; not a claim about any real cinema. */
+   Authored for a portfolio study; not a claim about any real cinema.
+
+   Course reference (IPT): Inheritance and Polymorphism.
+   Screen is the parent class. StandardScreen, GrandScreen, WraparoundScreen and SalonScreen
+   extend it with super(), and each one overrides perks() so the same method name gives a
+   different result per screen type (method overriding = polymorphism). */
 window.TARACINE = (function () {
+  // ---------- Inheritance: parent class ----------
+  class Screen {
+    constructor(id, name, short, price, blurb) {
+      this.id = id; this.name = name; this.short = short; this.price = price; this.blurb = blurb;
+    }
+    perks() { return ["Reserved seating", "Digital projection"]; }
+    priceFor(seats) { return this.price * seats; }
+    describe() { return `${this.name} · ₱${this.price.toLocaleString("en-PH")} per seat`; }
+  }
+  // ---------- Inheritance: child classes with extends + super() ----------
+  class StandardScreen extends Screen {
+    constructor() { super("standard", "Standard", "STD", 350, "Laser projection, surround sound, the everyday big screen."); }
+    perks() { return ["Laser projection", "7.1 surround sound", "Reserved seating"]; }
+  }
+  class GrandScreen extends Screen {
+    constructor() { super("grand", "Grand Screen", "GRAND", 550, "Our largest screens, wall to wall, with immersive audio."); }
+    perks() { return ["Wall-to-wall screen", "Immersive object audio", "Extra-wide rows"]; }
+  }
+  class WraparoundScreen extends Screen {
+    constructor() { super("wrap", "Wraparound", "WRAP", 600, "Three walls of picture. Key scenes extend to your peripheral vision."); }
+    perks() { return ["270° picture on three walls", "Immersive object audio", "Centre-block seating"]; }
+  }
+  class SalonScreen extends Screen {
+    constructor() { super("salon", "Salon", "SALON", 900, "Forty leather recliners, blankets, and seat-side service."); }
+    perks() { return ["Leather recliners", "Blanket and pillow", "Seat-side food service", "Only 40 seats"]; }
+  }
+
+  // Polymorphism in use: the same perks() call, a different answer from each subclass.
+  const screens = [new StandardScreen(), new GrandScreen(), new WraparoundScreen(), new SalonScreen()];
+  const formats = {};
+  screens.forEach(screen => { formats[screen.id] = screen; });
+
   const films = [
     { id: "sa-dulo-ng-dagat", title: "Sa Dulo ng Dagat", status: "now", rating: "PG", runtime: 118, release: "2026-09-17", genres: ["Romance", "Drama"], formats: ["standard", "grand"], cast: ["Mara Villanueva", "Jerome Dizon", "Celeste Abad"], director: "Lia Trinidad", tagline: "Some tides only return once.", synopsis: ["A marine biologist returns to the fishing town she left at seventeen to close her late father's boatyard, and finds the boy who stayed behind now runs the only ferry out.", "Shot across one monsoon season in Quezon province, the film follows two people deciding whether home is a place or a person."], palette: ["#0F3A5F", "#F2A65A", "#F6EBDC"], motif: "sea" },
     { id: "lakbay-bituin", title: "Lakbay Bituin", status: "now", rating: "G", runtime: 96, release: "2026-09-24", genres: ["Animation", "Adventure"], formats: ["standard", "grand", "wrap"], cast: ["Voices of Ana Reyes", "Kiko Manalo", "Dolores Ong"], director: "Paolo Santiago", tagline: "Ten-year-old Tala builds a rocket out of a tricycle.", synopsis: ["When the town's last streetlight burns out, Tala decides the stars are simply too far away and sets out to bring one home, with her grandfather's tricycle, a kite, and a very reluctant goat.", "A hand-drawn animated adventure about distance, light, and the engineering of hope."], palette: ["#1B2550", "#F6C945", "#F28A2E"], motif: "rocket" },
@@ -23,13 +60,6 @@ window.TARACINE = (function () {
     { id: "signal-no-5", title: "Signal No. 5", status: "soon", rating: "R-13", runtime: 123, release: "2026-11-26", genres: ["Thriller", "Disaster"], formats: ["standard", "grand", "wrap", "salon"], cast: ["Dante Mercado", "Carmen Lagdameo"], director: "Carlo Ventura", tagline: "There is no higher number.", synopsis: ["A weather bureau forecaster realises the storm model is wrong by one category and has six hours to convince a city already asleep.", "A large-format thriller about the night the signals ran out."], palette: ["#06283D", "#E8352B", "#F6EBDC"], motif: "spiral" },
     { id: "luzviminda", title: "Luzviminda", status: "soon", rating: "PG", runtime: 138, release: "2026-12-03", genres: ["Anthology", "Drama"], formats: ["standard", "grand"], cast: ["Ensemble cast"], director: "Lia Trinidad, Isabel Cruz, Teo Agbayani", tagline: "Three islands. Three directors. One night.", synopsis: ["Three stories set on the same night in Luzon, Visayas and Mindanao, each by a different director, each ending at the same sunrise.", "An anthology for the holiday season."], palette: ["#1F6F63", "#E58C74", "#F6C945"], motif: "islands" }
   ];
-
-  const formats = {
-    standard: { id: "standard", name: "Standard", short: "STD", price: 350, blurb: "Laser projection, surround sound, the everyday big screen." },
-    grand:    { id: "grand", name: "Grand Screen", short: "GRAND", price: 550, blurb: "Our largest screens, wall to wall, with immersive audio." },
-    wrap:     { id: "wrap", name: "Wraparound", short: "WRAP", price: 600, blurb: "Three walls of picture. Key scenes extend to your peripheral vision." },
-    salon:    { id: "salon", name: "Salon", short: "SALON", price: 900, blurb: "Forty leather recliners, blankets, and seat-side service." }
-  };
 
   const cinemas = [
     { id: "cubao", name: "Taracine Cubao", city: "Quezon City", address: "Araneta City, General Roxas Ave, Cubao", formats: ["standard", "grand", "wrap", "salon"], screens: 10 },
@@ -77,10 +107,31 @@ window.TARACINE = (function () {
     return out;
   }
 
+  /* Course reference (IPT): Asynchronous JavaScript — Promises, setTimeout, resolve/reject.
+     These two functions simulate a server the way the lesson's checkLogin() does. The page
+     awaits them inside async functions with try...catch (see app.js). */
+  function checkLogin(email, password) {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        if (password === "wrongpass") { reject("That password is not correct. Try again."); return; }
+        if (!email.includes("@")) { reject("Invalid email address."); return; }
+        resolve({ name: email.split("@")[0], email });
+      }, 1500);
+    });
+  }
+  function holdSeats(seats) {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        if (!seats.length) reject("Pick at least one seat.");
+        else resolve({ seats: [...seats], minutes: 10 });
+      }, 1200);
+    });
+  }
+
   function fmtTime(h, m) { const hh = ((h + 11) % 12) + 1; return `${hh}:${String(m).padStart(2, "0")} ${h < 12 ? "AM" : "PM"}`; }
   function pad(n) { return String(n).padStart(2, "0"); }
   function isoDate(d) { return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; }
   function peso(n) { return "₱" + n.toLocaleString("en-PH"); }
 
-  return { films, formats, cinemas, ratingDescriptions, sessions, fmtTime, isoDate, peso, hash };
+  return { Screen, screens, films, formats, cinemas, ratingDescriptions, sessions, checkLogin, holdSeats, fmtTime, isoDate, peso, hash };
 })();
