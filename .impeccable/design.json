@@ -1,0 +1,200 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-04T00:00:00+08:00",
+  "title": "Design System: Taracine",
+  "extensions": {
+    "colorMeta": {
+      "accent": { "role": "primary", "displayName": "Kiosk Orange", "canonical": "#FF5A1F", "tonalRamp": ["oklch(22% 0.08 38)", "oklch(32% 0.12 38)", "oklch(42% 0.16 38)", "oklch(52% 0.20 38)", "oklch(60% 0.22 38)", "oklch(68% 0.22 38)", "oklch(82% 0.12 38)", "oklch(94% 0.04 38)"] },
+      "accent-hover": { "role": "primary", "displayName": "Kiosk Orange Pressed", "canonical": "#E84A12" },
+      "accent-soft": { "role": "primary", "displayName": "Orange Tint", "canonical": "#FFE9DF" },
+      "accent-ink": { "role": "primary", "displayName": "Burnt Orange Ink", "canonical": "#9A3208" },
+      "on-accent": { "role": "primary", "displayName": "Ink on Orange", "canonical": "#0F1115" },
+      "on-accent-soft": { "role": "primary", "displayName": "Deep Rust", "canonical": "#4A1C09" },
+      "ground": { "role": "neutral", "displayName": "Ground", "canonical": "#FFFFFF" },
+      "panel": { "role": "neutral", "displayName": "Panel", "canonical": "#F2F3F5" },
+      "panel-2": { "role": "neutral", "displayName": "Panel 2", "canonical": "#E9EBEF" },
+      "hairline": { "role": "neutral", "displayName": "Hairline", "canonical": "#E3E5E9" },
+      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "#0F1115", "tonalRamp": ["oklch(15% 0.01 260)", "oklch(25% 0.01 260)", "oklch(35% 0.012 260)", "oklch(48% 0.014 260)", "oklch(62% 0.012 260)", "oklch(82% 0.008 260)", "oklch(92% 0.005 260)", "oklch(96% 0.003 260)"] },
+      "ink-hover": { "role": "neutral", "displayName": "Ink Hover", "canonical": "#2A2D33" },
+      "mid": { "role": "neutral", "displayName": "Mid", "canonical": "#5C6370" },
+      "on-ink-muted": { "role": "neutral", "displayName": "Muted on Ink", "canonical": "#B8BCC4" },
+      "underline-rest": { "role": "neutral", "displayName": "Rest Underline", "canonical": "#C7CBD2" },
+      "ok": { "role": "status", "displayName": "Hold Green", "canonical": "#1E9E6A", "tonalRamp": ["oklch(22% 0.06 160)", "oklch(32% 0.09 160)", "oklch(42% 0.11 160)", "oklch(52% 0.13 160)", "oklch(62% 0.14 160)", "oklch(72% 0.12 160)", "oklch(86% 0.07 160)", "oklch(95% 0.03 160)"] },
+      "ok-soft": { "role": "status", "displayName": "Green Tint", "canonical": "#E3F5EC" },
+      "ok-ink": { "role": "status", "displayName": "Green Ink", "canonical": "#0F6B47" },
+      "warn-soft": { "role": "status", "displayName": "Warn Tint", "canonical": "#FFF3E0" },
+      "warn-ink": { "role": "status", "displayName": "Warn Ink", "canonical": "#8A4B00" },
+      "restricted": { "role": "status", "displayName": "Restricted Red", "canonical": "#B3261E" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "The one page question and the film title on detail; max 18ch." },
+      "headline": { "displayName": "Headline", "purpose": "Course titles." },
+      "title": { "displayName": "Title", "purpose": "Card and group headings, selected tile title, ticket total." },
+      "price": { "displayName": "Price", "purpose": "Per-seat price on format cards." },
+      "body": { "displayName": "Body", "purpose": "Running text; synopsis capped at 66ch." },
+      "body-sm": { "displayName": "Body Small", "purpose": "Chips, small buttons, picker labels, tile next-show lines." },
+      "meta": { "displayName": "Meta", "purpose": "Tile metadata, addresses, bottom bar subline." },
+      "label": { "displayName": "Label", "purpose": "Rating badges, small chips, counts, spec labels, cell sublines. Never uppercase." }
+    },
+    "shadows": [],
+    "motion": [
+      { "name": "t", "value": "180ms cubic-bezier(0.2, 0.8, 0.2, 1)", "purpose": "Default transition for background, border-color, color, opacity and transform on every interactive state." },
+      { "name": "bar-slide", "value": "transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1)", "purpose": "Continue bar translateY entrance and exit; visibility delayed 220ms on hide." },
+      { "name": "press", "value": "transform: scale(0.98)", "purpose": "Button :active feedback." },
+      { "name": "inline-note", "value": "2200ms", "purpose": "Duration an inline note replaces an element's text before restoring (app.js inlineNote)." },
+      { "name": "reduced-motion", "value": "transition: none; animation: none; scroll-behavior: auto", "purpose": "Applied to everything under prefers-reduced-motion: reduce." }
+    ],
+    "breakpoints": [
+      { "name": "grid-tighten", "value": "1100px", "purpose": "Tiles 5 to 4, formats 4 to 2, tickets and footer collapse." },
+      { "name": "phone", "value": "820px", "purpose": "Gutter 16px, nav hidden, tab bar shown, tiles 2-up, steps collapse to discs, dates 4-up, film detail stacks." },
+      { "name": "narrow", "value": "420px", "purpose": "Tile titles step down, continue bar subline hidden, title clamps to two lines." }
+    ],
+    "layout": {
+      "maxWidth": "1200px",
+      "gutter": "24px",
+      "gutterMobile": "16px",
+      "topbarHeight": "64px",
+      "topbarHeightMobile": "60px",
+      "continueBarMinHeight": "76px",
+      "tabbarHeight": "64px",
+      "bodyPaddingWithBar": "92px",
+      "bodyPaddingWithBarMobile": "164px",
+      "coursePadding": "32px",
+      "posterAspect": "2 / 3",
+      "focusRing": "3px solid var(--accent); outline-offset: 2px; border-radius: 6px",
+      "backdrop": "topbar only: rgba(255,255,255,0.92) + backdrop-filter saturate(140%) blur(10px)"
+    }
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The single orange action on a view; lives in the continue bar once a selection exists.",
+      "html": "<button class=\"ds-btn\">Pick a time<svg class=\"ds-icon\" viewBox=\"0 0 24 24\"><path d=\"M5 12h14M13 6l6 6-6 6\"/></svg></button>",
+      "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; height: 52px; padding: 0 22px; border-radius: 999px; border: 1px solid var(--accent, #FF5A1F); background: var(--accent, #FF5A1F); color: var(--on-accent, #0F1115); font-family: Lexend, system-ui, sans-serif; font-weight: 600; font-size: 1rem; white-space: nowrap; cursor: pointer; transition: background 180ms cubic-bezier(0.2,0.8,0.2,1), border-color 180ms cubic-bezier(0.2,0.8,0.2,1), transform 180ms cubic-bezier(0.2,0.8,0.2,1); } .ds-btn:hover { background: var(--accent-hover, #E84A12); border-color: var(--accent-hover, #E84A12); } .ds-btn:active { transform: scale(0.98); } .ds-btn:focus-visible { outline: 3px solid var(--accent, #FF5A1F); outline-offset: 2px; } .ds-btn:disabled { background: var(--panel-2, #E9EBEF); border-color: var(--panel-2, #E9EBEF); color: var(--mid, #5C6370); cursor: not-allowed; transform: none; } .ds-icon { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Secondary pill: white, hairline, ink text. Used for Trailer, Browse by format, All movies.",
+      "html": "<button class=\"ds-btn-ghost\"><svg class=\"ds-icon\" viewBox=\"0 0 24 24\" style=\"fill:currentColor;stroke:none\"><path d=\"M7 5v14l11-7z\"/></svg>Trailer</button>",
+      "css": ".ds-btn-ghost { display: inline-flex; align-items: center; justify-content: center; gap: 10px; height: 52px; padding: 0 22px; border-radius: 999px; border: 1px solid var(--line, #E3E5E9); background: var(--bg, #FFFFFF); color: var(--ink, #0F1115); font-family: Lexend, system-ui, sans-serif; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 180ms cubic-bezier(0.2,0.8,0.2,1), border-color 180ms cubic-bezier(0.2,0.8,0.2,1), transform 180ms cubic-bezier(0.2,0.8,0.2,1); } .ds-btn-ghost:hover { background: var(--panel, #F2F3F5); border-color: var(--panel-2, #E9EBEF); } .ds-btn-ghost:active { transform: scale(0.98); } .ds-btn-ghost:focus-visible { outline: 3px solid var(--accent, #FF5A1F); outline-offset: 2px; } .ds-icon { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }"
+    },
+    {
+      "name": "Ink Button",
+      "kind": "button",
+      "refersTo": "button-ink",
+      "description": "Dark pill for secondary emphasis (Sign in pill, Pick on a selected cinema card).",
+      "html": "<button class=\"ds-btn-ink\">Sign in</button>",
+      "css": ".ds-btn-ink { display: inline-flex; align-items: center; justify-content: center; gap: 10px; height: 52px; padding: 0 22px; border-radius: 999px; border: 1px solid var(--ink, #0F1115); background: var(--ink, #0F1115); color: #fff; font-family: Lexend, system-ui, sans-serif; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 180ms cubic-bezier(0.2,0.8,0.2,1), transform 180ms cubic-bezier(0.2,0.8,0.2,1); } .ds-btn-ink:hover { background: #2A2D33; border-color: #2A2D33; } .ds-btn-ink:active { transform: scale(0.98); } .ds-btn-ink:focus-visible { outline: 3px solid var(--accent, #FF5A1F); outline-offset: 2px; }"
+    },
+    {
+      "name": "Filter Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "36px pill filter; pressed goes ink, never orange.",
+      "html": "<div style=\"display:flex;gap:8px\"><button class=\"ds-chip\" aria-pressed=\"true\">All</button><button class=\"ds-chip\" aria-pressed=\"false\">Grand Screen · ₱550</button><button class=\"ds-chip\" aria-pressed=\"false\">Salon · ₱900</button></div>",
+      "css": ".ds-chip { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line, #E3E5E9); background: var(--bg, #FFFFFF); color: var(--ink, #0F1115); font-family: Lexend, system-ui, sans-serif; font-size: 0.9375rem; font-weight: 500; cursor: pointer; transition: background 180ms cubic-bezier(0.2,0.8,0.2,1), border-color 180ms cubic-bezier(0.2,0.8,0.2,1), color 180ms cubic-bezier(0.2,0.8,0.2,1); } .ds-chip:hover:not([aria-pressed=\"true\"]) { background: var(--panel, #F2F3F5); } .ds-chip[aria-pressed=\"true\"] { background: var(--ink, #0F1115); color: #fff; border-color: var(--ink, #0F1115); } .ds-chip:focus-visible { outline: 3px solid var(--accent, #FF5A1F); outline-offset: 2px; }"
+    },
+    {
+      "name": "Step Rail",
+      "kind": "nav",
+      "refersTo": "step",
+      "description": "Three-step booking rail: current step orange, done step green, rest panel grey.",
+      "html": "<nav class=\"ds-steps\"><span class=\"ds-step ds-step--done\"><b><svg class=\"ds-icon\" viewBox=\"0 0 24 24\"><path d=\"M5 12l5 5L20 7\"/></svg></b><span>Movie</span></span><span class=\"ds-sep\"></span><span class=\"ds-step\" aria-current=\"step\"><b>2</b><span>Cinema &amp; time</span></span><span class=\"ds-sep\"></span><span class=\"ds-step\"><b>3</b><span>Tickets</span></span></nav>",
+      "css": ".ds-steps { display: flex; align-items: center; gap: 8px; font-family: Lexend, system-ui, sans-serif; } .ds-step { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 16px 6px 6px; border-radius: 999px; background: var(--panel, #F2F3F5); color: var(--mid, #5C6370); font-weight: 500; white-space: nowrap; } .ds-step b { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--bg, #FFFFFF); color: var(--ink, #0F1115); font-weight: 600; font-size: 0.9375rem; } .ds-step[aria-current=\"step\"] { background: var(--accent, #FF5A1F); color: var(--on-accent, #0F1115); } .ds-step[aria-current=\"step\"] b { background: #fff; color: var(--accent-ink, #9A3208); } .ds-step--done { background: var(--ok-soft, #E3F5EC); color: var(--ok, #1E9E6A); } .ds-step--done b { background: var(--ok, #1E9E6A); color: #fff; } .ds-step--done .ds-icon { width: 16px; height: 16px; stroke-width: 2.5; } .ds-sep { width: 24px; height: 1px; background: var(--line, #E3E5E9); } .ds-icon { stroke: currentColor; fill: none; stroke-linecap: round; stroke-linejoin: round; }"
+    },
+    {
+      "name": "Top Bar Navigation",
+      "kind": "nav",
+      "refersTo": "nav-link",
+      "description": "Pill nav links in mid; current page is an ink pill.",
+      "html": "<nav class=\"ds-nav\"><a href=\"#\" aria-current=\"page\">Home</a><a href=\"#\">Movies</a><a href=\"#\">Cinemas</a><a href=\"#\">Experience</a><a href=\"#\">Club</a></nav>",
+      "css": ".ds-nav { display: flex; gap: 4px; font-family: Lexend, system-ui, sans-serif; } .ds-nav a { display: inline-flex; align-items: center; height: 40px; padding: 0 14px; border-radius: 999px; font-weight: 500; color: var(--mid, #5C6370); text-decoration: none; transition: background 180ms cubic-bezier(0.2,0.8,0.2,1), color 180ms cubic-bezier(0.2,0.8,0.2,1); } .ds-nav a:hover { background: var(--panel, #F2F3F5); color: var(--ink, #0F1115); } .ds-nav a[aria-current=\"page\"] { background: var(--ink, #0F1115); color: #fff; } .ds-nav a:focus-visible { outline: 3px solid var(--accent, #FF5A1F); outline-offset: 2px; border-radius: 6px; }"
+    },
+    {
+      "name": "Time Pill",
+      "kind": "custom",
+      "refersTo": "time-pill",
+      "description": "Showtime cell carrying format and price; pressed is orange, past is struck on panel, sold out is dashed, next wears an ink tag.",
+      "html": "<div class=\"ds-times\"><button class=\"ds-time ds-time--past\" disabled><b>4:55 PM</b><small>Standard · ₱350</small></button><button class=\"ds-time ds-time--next\" aria-pressed=\"true\"><b>7:50 PM</b><small>Standard · ₱350</small></button><button class=\"ds-time ds-time--few\" aria-pressed=\"false\"><b>10:30 PM</b><small>Few seats left</small></button><button class=\"ds-time ds-time--soldout\" disabled><b>9:10 PM</b><small>Sold out</small></button></div>",
+      "css": ".ds-times { display: flex; flex-wrap: wrap; gap: 10px; font-family: Lexend, system-ui, sans-serif; font-feature-settings: 'tnum' 1; } .ds-time { position: relative; display: inline-flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 112px; min-height: 60px; padding: 10px 14px; border-radius: 16px; border: 1px solid var(--line, #E3E5E9); background: var(--bg, #FFFFFF); color: var(--ink, #0F1115); line-height: 1.15; cursor: pointer; transition: background 180ms cubic-bezier(0.2,0.8,0.2,1), border-color 180ms cubic-bezier(0.2,0.8,0.2,1), color 180ms cubic-bezier(0.2,0.8,0.2,1); } .ds-time b { font-weight: 600; font-size: 1.0625rem; } .ds-time small { font-size: 0.75rem; color: var(--mid, #5C6370); } .ds-time:hover:not(:disabled) { background: var(--panel, #F2F3F5); } .ds-time[aria-pressed=\"true\"] { background: var(--accent, #FF5A1F); border-color: var(--accent, #FF5A1F); color: var(--on-accent, #0F1115); } .ds-time[aria-pressed=\"true\"] small { color: var(--on-accent-soft, #4A1C09); } .ds-time--past { background: var(--panel, #F2F3F5); border-color: transparent; color: var(--mid, #5C6370); cursor: not-allowed; } .ds-time--past b { text-decoration: line-through; text-decoration-thickness: 2px; } .ds-time--soldout { border-style: dashed; color: var(--mid, #5C6370); cursor: not-allowed; } .ds-time--few small { color: var(--accent-ink, #9A3208); font-weight: 600; } .ds-time--next::after { content: 'Next'; position: absolute; top: -9px; right: 12px; background: var(--ink, #0F1115); color: #fff; font-size: 0.625rem; font-weight: 600; letter-spacing: 0.04em; padding: 2px 7px; border-radius: 999px; } .ds-time:focus-visible { outline: 3px solid var(--accent, #FF5A1F); outline-offset: 2px; }"
+    },
+    {
+      "name": "Date Cell",
+      "kind": "custom",
+      "refersTo": "date-cell",
+      "description": "Seven-up day picker cell; pressed is orange with ink text.",
+      "html": "<div class=\"ds-dates\"><button class=\"ds-date\" aria-pressed=\"true\"><small>Today</small><b>4 Oct</b></button><button class=\"ds-date\" aria-pressed=\"false\"><small>Mon</small><b>5 Oct</b></button><button class=\"ds-date\" aria-pressed=\"false\"><small>Tue</small><b>6 Oct</b></button></div>",
+      "css": ".ds-dates { display: grid; grid-template-columns: repeat(3, 96px); gap: 8px; font-family: Lexend, system-ui, sans-serif; } .ds-date { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 64px; border-radius: 16px; border: 1px solid var(--line, #E3E5E9); background: var(--bg, #FFFFFF); color: var(--ink, #0F1115); line-height: 1.1; cursor: pointer; transition: background 180ms cubic-bezier(0.2,0.8,0.2,1), border-color 180ms cubic-bezier(0.2,0.8,0.2,1); } .ds-date small { font-size: 0.75rem; color: var(--mid, #5C6370); font-weight: 500; } .ds-date b { font-weight: 600; font-size: 1.125rem; } .ds-date:hover { background: var(--panel, #F2F3F5); } .ds-date[aria-pressed=\"true\"] { background: var(--accent, #FF5A1F); border-color: var(--accent, #FF5A1F); color: var(--on-accent, #0F1115); } .ds-date[aria-pressed=\"true\"] small { color: var(--on-accent-soft, #4A1C09); } .ds-date:focus-visible { outline: 3px solid var(--accent, #FF5A1F); outline-offset: 2px; }"
+    },
+    {
+      "name": "Poster Tile",
+      "kind": "card",
+      "refersTo": "tile",
+      "description": "2:3 poster with title, meta and next show; hover panel fill, selected orange border + tint and heavier title.",
+      "html": "<article class=\"ds-tile\" aria-pressed=\"true\" tabindex=\"0\"><div class=\"ds-tile__art\"><span class=\"ds-rating\">PG</span></div><div class=\"ds-tile__body\"><div class=\"ds-tile__title\">Sa Dulo ng Dagat</div><div class=\"ds-tile__meta\">Romance · Drama · 1h 58m</div><div class=\"ds-tile__next\">Next 7:50 PM · 1 more</div></div></article>",
+      "css": ".ds-tile { width: 200px; display: flex; flex-direction: column; gap: 10px; padding: 8px; border-radius: 24px; border: 2px solid transparent; background: transparent; color: var(--ink, #0F1115); font-family: Lexend, system-ui, sans-serif; cursor: pointer; transition: border-color 180ms cubic-bezier(0.2,0.8,0.2,1), background 180ms cubic-bezier(0.2,0.8,0.2,1); } .ds-tile:hover { background: var(--panel, #F2F3F5); } .ds-tile[aria-pressed=\"true\"] { border-color: var(--accent, #FF5A1F); background: var(--accent-soft, #FFE9DF); } .ds-tile:focus-visible { outline: 3px solid var(--accent, #FF5A1F); outline-offset: 2px; } .ds-tile__art { position: relative; border-radius: 20px; overflow: hidden; background: #1E3A5F; aspect-ratio: 2 / 3; } .ds-rating { position: absolute; top: 10px; left: 10px; display: inline-grid; place-items: center; height: 26px; min-width: 36px; padding: 0 8px; border-radius: 8px; background: var(--ink, #0F1115); color: #fff; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.02em; } .ds-tile__body { display: flex; flex-direction: column; gap: 4px; padding: 0 4px 4px; } .ds-tile__title { font-weight: 500; font-size: 1.0625rem; line-height: 1.3; } .ds-tile[aria-pressed=\"true\"] .ds-tile__title { font-weight: 600; font-size: 1.125rem; } .ds-tile__meta { color: var(--mid, #5C6370); font-size: 0.875rem; } .ds-tile__next { font-size: 0.9375rem; font-weight: 500; }"
+    },
+    {
+      "name": "Inline State",
+      "kind": "custom",
+      "refersTo": "state-ok",
+      "description": "State printed where the action happened; ok / info / warn tones. No toasts or modals.",
+      "html": "<div style=\"display:grid;gap:8px;max-width:420px\"><p class=\"ds-state\"><svg class=\"ds-icon\" viewBox=\"0 0 24 24\"><path d=\"M5 12l5 5L20 7\"/></svg><span>2 seats held for 10 minutes at Taracine Cubao, 7:50 PM.</span></p><p class=\"ds-state ds-state--info\"><svg class=\"ds-icon\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 11v5M12 8h.01\"/></svg><span>Trailers are not part of this design study.</span></p><p class=\"ds-state ds-state--warn\"><svg class=\"ds-icon\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 11v5M12 8h.01\"/></svg><span>Only 3 seats left in this room.</span></p></div>",
+      "css": ".ds-state { margin: 0; display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-radius: 14px; background: var(--ok-soft, #E3F5EC); color: #0F6B47; font-family: Lexend, system-ui, sans-serif; font-weight: 500; font-size: 0.9375rem; } .ds-state .ds-icon { color: var(--ok, #1E9E6A); } .ds-state--info { background: var(--panel, #F2F3F5); color: var(--mid, #5C6370); } .ds-state--info .ds-icon { color: var(--mid, #5C6370); } .ds-state--warn { background: #FFF3E0; color: #8A4B00; } .ds-state--warn .ds-icon { color: #C76A00; } .ds-icon { width: 20px; height: 20px; flex-shrink: 0; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }"
+    },
+    {
+      "name": "Quantity Stepper",
+      "kind": "input",
+      "refersTo": "qty-stepper",
+      "description": "The only input-like control: a 52px hairline pill with two icon buttons and a live output.",
+      "html": "<div class=\"ds-qty\"><button type=\"button\" aria-label=\"Fewer seats\"><svg class=\"ds-icon\" viewBox=\"0 0 24 24\"><path d=\"M6 12h12\"/></svg></button><output>2</output><button type=\"button\" aria-label=\"More seats\"><svg class=\"ds-icon\" viewBox=\"0 0 24 24\"><path d=\"M12 6v12M6 12h12\"/></svg></button></div>",
+      "css": ".ds-qty { display: inline-flex; align-items: center; border: 1px solid var(--line, #E3E5E9); border-radius: 999px; height: 52px; font-family: Lexend, system-ui, sans-serif; font-feature-settings: 'tnum' 1; } .ds-qty button { width: 52px; height: 100%; border: 0; background: transparent; display: grid; place-items: center; color: var(--ink, #0F1115); border-radius: 999px; cursor: pointer; transition: background 180ms cubic-bezier(0.2,0.8,0.2,1); } .ds-qty button:hover:not(:disabled) { background: var(--panel, #F2F3F5); } .ds-qty button:disabled { color: var(--line, #E3E5E9); cursor: not-allowed; } .ds-qty button:focus-visible { outline: 3px solid var(--accent, #FF5A1F); outline-offset: 2px; } .ds-qty output { min-width: 40px; text-align: center; font-weight: 600; font-size: 1.125rem; } .ds-icon { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Kiosk Clarity",
+    "overview": "Taracine is the lobby's self-service ticket kiosk brought to the web. Every screen is a course with one job: pick a film, pick a cinema and a time, set a seat count. Targets are sized for a thumb at arm's length (52px primary buttons, 56 to 64px picker cells, 2:3 posters five across), a three-step rail stays visible at the top of every page, and nothing moves until you touch it. The site refuses the dark streaming grid with a red button, the white-label Vista ticketing template, and the deco-facade direction it replaced.\n\nThe material is flat and bright: a white ground, light grey panels (#F2F3F5 / #E9EBEF) that alternate with the ground to separate courses, and 1px hairlines (#E3E5E9) for every edge that needs one. There are no gradients, no glows, no drop shadows anywhere in the stylesheet; depth is tonal. One orange (#FF5A1F) is rationed strictly by role: the current step, the current selection, and the primary action. Everything else that is \"on\" goes to ink (#0F1115) on white or white on ink. Selection is also expressed through weight and size (a selected tile's title steps from 500/1.0625rem to 600/1.125rem), not color alone.\n\nOne typeface, Lexend, carries every role from the 3rem display headline to the 0.625rem \"Next\" tag, in weights 400/500/600/700 with tabular numerals on by default so prices and times align. Posters are the only imagery. State prints itself inline where the action happened (a held-seats message under the stepper, a \"Trailers are not part of this design study\" note under the trailer button); there are no toasts and no modals.",
+    "keyCharacteristics": [
+      "One task per course; courses alternate white and panel grey, divided by hairlines.",
+      "Oversized pill and cell targets: 52px primary buttons, 44px steps, 56 to 64px picker cells, 2:3 poster tiles.",
+      "A persistent three-step rail (Movie, Cinema & time, Tickets) with current step orange and done steps green.",
+      "Select-then-continue: a tap selects (orange border and soft tint), a fixed bottom bar slides up with the one primary action.",
+      "Flat material: no shadows, no gradients, no glow; tonal panels and 1px hairlines only.",
+      "Lexend everywhere, tabular numerals, tight negative tracking on headings.",
+      "Motion only in response to touch: 180ms state transitions, 220ms bar slide, fully disabled under reduced-motion."
+    ],
+    "rules": [
+      { "name": "The One Orange Rule", "body": "Orange appears on exactly three kinds of thing: the current step, the current selection, and the primary action. If two primary buttons are visible at once, one of them is wrong. Secondary \"on\" states (pressed chips, current nav, pressed cinema pill) go to ink, not orange.", "section": "colors" },
+      { "name": "The Dark-On-Orange Rule", "body": "Text on an orange fill is ink or deep rust, never white. White text is reserved for ink and green fills.", "section": "colors" },
+      { "name": "The Green Means Done Rule", "body": "Green marks a completed step, a hold confirmation, or a G rating. It never marks a selectable or selected target.", "section": "colors" },
+      { "name": "The Weight Steps With Selection Rule", "body": "Selecting a target raises its label one weight (500 to 600) and, for tiles, one size step (1.0625rem to 1.125rem). Color alone never carries selection.", "section": "typography" },
+      { "name": "The No Caps Rule", "body": "No label, badge, or button is uppercase. Hierarchy comes from weight, size, and tone.", "section": "typography" },
+      { "name": "The Hairline Or Nothing Rule", "body": "An edge is a 1px hairline (#E3E5E9) or no edge at all. No shadow, no glow, no second border color, with the single exception of the 2px orange selection border on tiles and cinema cards.", "section": "elevation" },
+      { "name": "The Nothing Moves At Rest Rule", "body": "Hover shifts a fill one tone (ground to panel, panel to panel 2) or darkens the accent. Press scales a button to 0.98. The continue bar slides in 220ms; everything else transitions in 180ms on cubic-bezier(0.2, 0.8, 0.2, 1). Under prefers-reduced-motion: reduce every transition and animation is off and scroll is instant.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep one primary orange button per view, carried by the continue bar when a selection exists.",
+      "Do make every pressable target at least 36px tall (chips) and 52px for primary actions, with picker cells at 56 to 64px.",
+      "Do raise a selected label one weight step (500 to 600) alongside its color change.",
+      "Do separate courses by alternating white and panel grey or a single 1px hairline, never both.",
+      "Do print state inline where the action happened, in the ok / info / warn message row.",
+      "Do keep every time pill's format and price in its subline, and show past and sold-out times greyed or dashed rather than removed.",
+      "Do transition fills and borders over 180ms on cubic-bezier(0.2, 0.8, 0.2, 1) and honor prefers-reduced-motion by removing all motion.",
+      "Do use Lexend for everything, with tabular numerals on, and keep headings at 600 with -0.015em tracking."
+    ],
+    "donts": [
+      "Don't add box shadows, gradients, or glows to any surface or state; depth is tonal and edged by hairlines.",
+      "Don't put orange on a chip, nav pill, cinema pill, or any secondary \"on\" state; those go to ink.",
+      "Don't set white text on an orange fill; use ink or deep rust.",
+      "Don't use green or red for selection or emphasis; green marks done, red marks R-16 and R-18 only.",
+      "Don't set labels or buttons in uppercase, or introduce a second typeface or an icon font.",
+      "Don't use toasts, modals, or snackbars; hold confirmations, trailer notes, and warnings print inline.",
+      "Don't animate anything at rest or on page load; only the continue bar enters, and only in response to a selection.",
+      "Don't switch grids to auto-fill; columns are fixed per breakpoint (5/4/2 tiles, 4/2 formats, 2/1 cinemas, 7/4 dates)."
+    ]
+  }
+}
