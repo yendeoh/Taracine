@@ -520,3 +520,54 @@ button.link { background: none; border: 0; padding: 0; font: inherit; cursor: po
   .receipt__body { grid-template-columns: 1fr; }
   .qr { justify-self: start; }
 }
+
+/* ---------- online ticket document (receipt) ---------- */
+.receipts { grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 24px; }
+.doc { background: #fff; color: #111; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; font-family: var(--font); }
+.doc.new { border-color: var(--ok); }
+.doc__head { text-align: center; padding: 22px 20px 14px; border-bottom: 1px solid #111; }
+.doc__brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.75rem; letter-spacing: -0.02em; }
+.doc__brand i { width: 34px; height: 34px; border-radius: 50%; border: 3px solid #111; display: inline-grid; place-items: center; }
+.doc__brand i::after { content: ""; width: 12px; height: 12px; border-radius: 50%; background: var(--accent); }
+.doc__title { font-weight: 700; font-size: 1.0625rem; letter-spacing: 0.04em; text-transform: uppercase; margin-top: 10px; }
+.doc__operator { margin-top: 10px; font-size: 0.875rem; line-height: 1.35; }
+.doc__operator b { display: block; font-weight: 600; text-transform: uppercase; letter-spacing: 0.02em; }
+.doc__operator u { text-decoration: none; display: block; font-weight: 600; }
+.doc__fiscal { padding: 12px 20px; border-bottom: 1px solid #111; display: grid; grid-template-columns: auto 1fr; gap: 2px 14px; font-size: 0.8125rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.doc__fiscal span:nth-child(odd) { font-weight: 700; }
+.doc__ticket { border-bottom: 2px dashed #111; }
+.doc__ticket:last-child { border-bottom: 0; }
+.doc__body { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 14px 18px; padding: 14px 20px 10px; align-items: start; }
+.doc__kv { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 0.9375rem; align-content: start; }
+.doc__kv span:nth-child(odd) { color: #333; }
+.doc__kv b { font-weight: 700; }
+.doc__kv .movie { font-size: 1.5rem; line-height: 1.1; grid-column: 1 / -1; font-weight: 700; margin: 2px 0 6px; }
+.doc__kv .plain { grid-column: 1 / -1; color: #333; font-size: 0.875rem; }
+.doc__codes { display: grid; gap: 10px; justify-items: center; }
+.doc__codes .qrbox { width: 120px; height: 120px; border: 1px dashed #BBB; border-radius: 4px; }
+.doc__codes svg.barcode { width: 160px; height: 54px; }
+.doc__codes small { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.75rem; letter-spacing: 0.08em; }
+.doc__bar { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 12px; background: #111; color: #fff; padding: 10px 20px; }
+.doc__bar span { font-weight: 700; font-size: 1rem; }
+.doc__bar b { font-weight: 700; font-size: 2.25rem; text-align: center; letter-spacing: 0.02em; line-height: 1; }
+.doc__amounts { padding: 10px 20px 12px; display: grid; grid-template-columns: 1fr auto; gap: 3px 16px; font-size: 0.9375rem; font-variant-numeric: tabular-nums; }
+.doc__amounts span:nth-child(even) { text-align: right; font-weight: 600; }
+.doc__amounts .due { border-top: 2px solid #111; margin-top: 4px; padding-top: 6px; font-weight: 700; }
+.doc__amounts .due + .due { font-weight: 700; }
+.doc__foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 20px; background: var(--panel); font-size: 0.8125rem; color: var(--mid); flex-wrap: wrap; }
+.doc__foot .link { color: var(--ink); }
+.doc__foot .locked { color: var(--mid); }
+.doc__foot b { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--ink); }
+.doc__ticket--more { padding: 6px 20px 10px; font-size: 0.8125rem; color: #333; }
+@media (max-width: 820px) {
+  .receipts { grid-template-columns: 1fr; }
+  .doc__body { grid-template-columns: 1fr; }
+  .doc__codes { justify-items: start; grid-auto-flow: column; align-items: center; }
+  .doc__bar b { font-size: 1.75rem; }
+}
+@media print {
+  .topbar, .tabbar, .footer, .hero .actions, .doc__foot, .continue { display: none !important; }
+  body { background: #fff; padding: 0; }
+  .receipts { grid-template-columns: 1fr; gap: 0; }
+  .doc { border: 0; border-radius: 0; page-break-after: always; }
+}

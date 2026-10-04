@@ -499,7 +499,9 @@
       paying = true; payBtn.disabled = true;
       payState.hidden = false; payState.className = "state state--info"; payState.innerHTML = `<svg class="icon"><use href="#i-clock"/></svg><span>Processing ${method === "bypass" ? "demo payment" : method}…</span>`;
       const F = D.formats[chosen.format];
-      const booking = { filmId: film.id, filmTitle: film.title, poster: film.poster || `assets/posters/photos/${film.id}.jpg`, cinemaId: myCinema, cinemaName: cinema().name, date: dateIso, time: D.fmtTime(chosen.h, chosen.m), format: F.name, seats: [...seats], total: F.priceFor(seats.length), name: user ? `${user.name} ${user.lastName || ""}`.trim() : nameInput.value.trim(), email: user ? user.email : "", userId: user ? user.id : null };
+      const showAt = new Date(`${dateIso}T${String(chosen.h).padStart(2, "0")}:${String(chosen.m).padStart(2, "0")}:00`).toISOString();
+      const screenNo = (D.hash(film.id + myCinema + dateIso + chosen.h) % cinema().screens) + 1;
+      const booking = { filmId: film.id, filmTitle: film.title, poster: film.poster || `assets/posters/photos/${film.id}.jpg`, cinemaId: myCinema, cinemaName: cinema().name, cinemaAddress: `${cinema().address}, ${cinema().city}`, date: dateIso, time: D.fmtTime(chosen.h, chosen.m), showAt, screen: screenNo, format: F.name, pricePerSeat: F.price, rating: film.rating, censor: D.ratingDescriptions[film.rating], seats: [...seats], total: F.priceFor(seats.length), name: user ? `${user.name} ${user.lastName || ""}`.trim() : nameInput.value.trim(), email: user ? user.email : "", userId: user ? user.id : null };
       try {
         const paid = await D.payBooking(booking, method);
         D.store.addBooking(paid); stopHold(); stopFeed(); D.store.setPending(null);
@@ -742,20 +744,106 @@
   }
 
   // ================= TICKETS =================
+  /* Receipts are rendered as an "online ticket" document: operator header, fiscal rows, then one ticket per seat
+     with a blank QR area and a barcode, a Screen bar, the amount breakdown and a Seat bar. All fiscal values are demo
+     values. Cancellation closes 12 hours before the show. */
   if (page === "tickets") {
     const list = $("#receipts"), highlight = params.get("ref");
-    function qr(ref) { const h = D.hash(ref); let cells = ""; for (let i = 0; i < 144; i++) { const r = Math.floor(i / 12), c = i % 12; const finder = (r < 3 && c < 3) || (r < 3 && c > 8) || (r > 8 && c < 3); const on = finder ? !((r === 1 || r === 10) && (c === 1 || c === 10)) : ((h >> (i % 31)) ^ ((i * 2654435761) >>> 7)) & 1; cells += `<i class="${on ? "" : "o"}"></i>`; } return `<div class="qr" aria-label="Demo entry code for ${ref}" role="img">${cells}</div>`; }
+    const CANCEL_WINDOW_MS = 12 * 60 * 60 * 1000;
+    const OPERATOR = { name: "Taracine Cinemas Corporation", tin: "000-123-456-000", min: "20260101260000001", sn: "TRC-POS-07" };
+    function showDate(b) {
+      if (b.showAt) return new Date(b.showAt);
+      const m = /(\d+):(\d+) (AM|PM)/.exec(b.time || ""); let h = m ? +m[1] % 12 : 0; if (m && m[3] === "PM") h += 12;
+      return new Date(`${b.date}T${String(h).padStart(2, "0")}:${m ? m[2] : "00"}:00`);
+    }
+    function canCancel(b) { return showDate(b).getTime() - Date.now() > CANCEL_WINDOW_MS; }
+    function cancelLabel(b) {
+      const left = showDate(b).getTime() - Date.now();
+      if (left <= 0) return "Show has started";
+      if (left <= CANCEL_WINDOW_MS) return "Cancellations closed (12 hours before the show)";
+      const deadline = new Date(showDate(b).getTime() - CANCEL_WINDOW_MS);
+      return `Free cancellation until ${DAYS[deadline.getDay()]} ${deadline.getDate()} ${MONTHS[deadline.getMonth()]}, ${D.fmtTime(deadline.getHours(), deadline.getMinutes())}`;
+    }
+    function fmtDateTime(iso) { const d = new Date(iso); return `${String(d.getMonth() + 1).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")}/${d.getFullYear()}-${D.fmtTime(d.getHours(), d.getMinutes()).toLowerCase()}`; }
+    function money(n) { return n.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
+    function ticketHTML(b, seat, idx) {
+      const per = b.pricePerSeat || Math.round(b.total / b.seats.length);
+      const basic = per / 1.22, amTax = basic * 0.10, cTax = basic * 0.12;     // demo breakdown: amusement tax + VAT
+      const code = `${b.ref}-${String(idx + 1).padStart(2, "0")}`;
+      const d = showDate(b);
+      return `<section class="doc__ticket">
+        <div class="doc__body">
+          <div class="doc__kv">
+            <span>Booking No.</span><b>${code}</b>
+            <span class="movie">${b.filmTitle}</span>
+            <span>Screening Date</span><b>${DAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}</b>
+            <span>Screening Time</span><b>${b.time}</b>
+            <span class="plain">${b.rating ? `${b.rating} · ${b.censor || ""}` : ""}</span>
+            <span>Ticket Type</span><b>${b.format} · Regular</b>
+            <span>Name</span><b>${b.name}</b>
+          </div>
+          <div class="doc__codes">
+            <div class="qrbox" aria-label="QR code area, left blank in this study"></div>
+            <svg class="barcode" data-barcode="${code}"></svg>
+            <small>${code}</small>
+          </div>
+        </div>
+        <div class="doc__bar"><span>Screen</span><b>Cinema ${b.screen || 1}</b></div>
+        <div class="doc__amounts">
+          <span>Gross</span><span>${money(per)}</span>
+          <span>Ord.</span><span>1</span>
+          <span>Discount</span><span>0.00</span>
+          <span>Net</span><span>${money(per)}</span>
+          <span>Basic</span><span>${money(basic)}</span>
+          <span>Am. Tax</span><span>${money(amTax)}</span>
+          <span>C. Tax</span><span>${money(cTax)}</span>
+          <span class="due">Amt due</span><span class="due">₱${money(per)}</span>
+        </div>
+        <div class="doc__bar"><span>Seat</span><b>${seat.replace(/^([A-Z]+)(\d+)$/, "$1-$2")}</b></div>
+      </section>`;
+    }
     function paint() {
       const all = D.store.bookings();
-      $("#tickets-sub").textContent = all.length ? `${all.length} booking${all.length > 1 ? "s" : ""} made in this browser. Show the code at the door.` : "No bookings yet. Pick a film and a time to get started.";
-      list.innerHTML = all.length ? all.map(b => `<article class="receipt ${b.ref === highlight ? "new" : ""}" data-ref="${b.ref}">
-        <div class="receipt__top"><img src="${b.poster}" alt="" referrerpolicy="no-referrer"><div><h3>${b.filmTitle}</h3><p>${b.cinemaName} · ${b.format}</p></div></div>
-        <div class="receipt__body"><div class="receipt__rows"><div><span>When</span><b>${fmtDay(b.date)} · ${b.time}</b></div><div><span>Seats</span><b>${b.seats.join(", ")}</b></div><div><span>Name</span><b>${b.name}</b></div><div><span>Paid</span><b>${D.peso(b.total)} · ${b.method}</b></div></div>${qr(b.ref)}</div>
-        <div class="receipt__foot"><span>Ref <b>${b.ref}</b></span><span>${b.ref === highlight ? "Just booked · " : ""}<button type="button" class="link" data-cancel="${b.ref}">Cancel booking</button></span></div>
-      </article>`).join("") : `<div class="empty"><h3>Nothing booked yet</h3><p>Your receipts will show up here after payment.</p><a class="btn btn--sm" href="movies.html">Browse movies</a></div>`;
+      $("#tickets-sub").textContent = all.length ? `${all.length} booking${all.length > 1 ? "s" : ""} made in this browser. Show a ticket's code at the door. Cancellations close 12 hours before the show.` : "No bookings yet. Pick a film and a time to get started.";
+      $("#print-tickets").hidden = !all.length;
+      list.innerHTML = all.length ? all.map((b, i) => `<article class="doc ${b.ref === highlight ? "new" : ""}" data-ref="${b.ref}">
+        <header class="doc__head">
+          <div class="doc__brand"><i aria-hidden="true"></i>taracine</div>
+          <div class="doc__title">Taracine Online Ticket</div>
+          <div class="doc__operator"><b>${OPERATOR.name}</b><u>${b.cinemaName}</u>${b.cinemaAddress || ""}</div>
+        </header>
+        <div class="doc__fiscal">
+          <span>Business Name</span><span>${OPERATOR.name}</span>
+          <span>VAT Reg TIN</span><span>${OPERATOR.tin}</span>
+          <span>MIN</span><span>${OPERATOR.min}</span>
+          <span>Machine SN</span><span>${OPERATOR.sn}</span>
+          <span>Trans. Date</span><span>${fmtDateTime(b.paidAt)}</span>
+          <span>OR Number</span><span>${String(100000 + (D.hash(b.ref) % 899999)).padStart(8, "0")}</span>
+          <span>T/N</span><span>${b.ref}/${String(b.seats.length).padStart(3, "0")}</span>
+          <span>Payment</span><span>${b.method}</span>
+        </div>
+        ${b.seats.map((seat, idx) => ticketHTML(b, seat, idx)).join("")}
+        <div class="doc__foot"><span>Ref <b>${b.ref}</b> · ${b.seats.length} ticket${b.seats.length > 1 ? "s" : ""} · ₱${money(b.total)} total</span>
+          ${canCancel(b) ? `<span>${b.ref === highlight ? "Just booked · " : ""}<button type="button" class="link" data-cancel="${b.ref}">Cancel booking</button> <span class="locked">(${cancelLabel(b)})</span></span>` : `<span class="locked">${cancelLabel(b)}</span>`}
+        </div>
+      </article>`).join("") : `<div class="empty"><h3>Nothing booked yet</h3><p>Your tickets will show up here after payment.</p><a class="btn btn--sm" href="movies.html">Browse movies</a></div>`;
+      drawCodes();
     }
-    // Lesson: Event Delegation — one listener on the list handles every Cancel button
-    list.addEventListener("click", e => { const b = e.target.closest("[data-cancel]"); if (!b) return; D.store.removeBooking(b.dataset.cancel); paint(); });
+    function drawCodes() {
+      $$("svg[data-barcode]", list).forEach(svg => {
+        if (window.JsBarcode) { try { JsBarcode(svg, svg.dataset.barcode, { format: "CODE128", displayValue: false, height: 44, width: 1.4, margin: 0 }); return; } catch (e) {} }
+        svg.outerHTML = `<small>${svg.dataset.barcode}</small>`;
+      });
+    }
+    // Lesson: Event Delegation — one listener on the list handles every Cancel button; the 12-hour rule is re-checked at click time
+    list.addEventListener("click", e => {
+      const btn = e.target.closest("[data-cancel]"); if (!btn) return;
+      const b = D.store.bookings().find(x => x.ref === btn.dataset.cancel);
+      if (!b || !canCancel(b)) { paint(); return; }
+      D.store.removeBooking(b.ref); paint();
+    });
+    $("#print-tickets").addEventListener("click", () => window.print());
     paint();
   }
 })();

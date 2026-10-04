@@ -535,3 +535,7 @@ The orange ration is unchanged: the only orange on the sign-in page is the Login
 - **Payment methods** `.method`: 64px radio rows with a 16px radius hairline border; the checked row turns `--ink` border on `--panel`, and the demo method turns `--accent` border on `--accent-soft`. States print inline under the rows.
 - **Receipt** `.receipt`: a 24px card split by a dashed hairline into poster + title, detail rows + a 96px demo entry code (12×12 ink cells with three finder squares), and a `--panel` footer carrying the monospace reference and Cancel. The receipt just paid gets an `--ok` border.
 - **Step rail** gains step 4, Payment; steps 1–3 show as done (green) while paying.
+
+## Online ticket document (replaces the receipt card)
+
+`.doc` is a printed e-ticket rendered on white, deliberately a document rather than a UI card: centred brand and "Taracine Online Ticket" title, operator and cinema address, a monospace fiscal block, then one `.doc__ticket` per seat separated by a 2px dashed rule. Each ticket has a label/value grid (movie at 1.5rem 700), a 120px dashed blank QR area, a 160×54 barcode, two full-width black bars (`.doc__bar`: Screen, Seat) with 2.25rem white values, and a tabular amount list with a 2px rule above Amt due. The `--panel` footer holds the reference and Cancel, or the locked reason once the 12-hour window has closed. Print styles hide the chrome and break pages per booking.
