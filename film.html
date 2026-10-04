@@ -38,6 +38,8 @@
   <symbol id="i-ig" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></symbol>
   <symbol id="i-x" viewBox="0 0 24 24"><path d="M4 4l16 16M20 4L4 20"/></symbol>
   <symbol id="i-tt" viewBox="0 0 24 24"><path d="M14 3v12a4 4 0 1 1-4-4"/><path d="M14 3c0 3 2 5 5 5"/></symbol>
+  <symbol id="i-wheel" viewBox="0 0 24 24"><circle cx="13" cy="4" r="2"/><path d="M11 7v6h5l3 6"/><path d="M8.5 11.5a5 5 0 1 0 7 7"/></symbol>
+  <symbol id="i-reset" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></symbol>
 </svg>
 
 <header class="topbar">
@@ -62,7 +64,7 @@
   <nav class="steps" aria-label="Booking steps">
     <a class="step done" href="movies.html"><b><svg class="icon"><use href="#i-check"/></svg></b><span>Movie</span></a><span class="sep" aria-hidden="true"></span>
     <a class="step" id="step-2" href="#when" aria-current="step"><b>2</b><span>Cinema &amp; time</span></a><span class="sep" aria-hidden="true"></span>
-    <a class="step" id="step-3" href="#tickets"><b>3</b><span>Tickets</span></a>
+    <a class="step" id="step-3" href="#seats"><b>3</b><span>Seats &amp; tickets</span></a>
   </nav>
   <section class="film" aria-labelledby="film-title">
     <div class="film__art"><img id="film-poster" src="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 2 3%27%3E%3Crect width=%272%27 height=%273%27 fill=%27%23F2F3F5%27/%3E%3C/svg%3E" alt="" width="400" height="600"></div>
@@ -95,12 +97,40 @@
   </div>
 </section>
 
+<section class="course" id="seats" aria-labelledby="seats-title" hidden>
+  <div class="wrap">
+    <div class="course__head">
+      <div class="lead"><h2 id="seats-title">Pick your seats</h2><p id="seats-sub">Tap seats to add them, tap again to remove. Seats update live as other customers book.</p></div>
+      <span class="live" id="live"><i aria-hidden="true"></i><span>Live · waiting for updates</span></span>
+    </div>
+    <div class="seatmap">
+      <div class="seatmap__legend">
+        <span><i class="k-mine"></i>Your selection</span>
+        <span><i class="k-free"></i>Available</span>
+        <span><i></i>Unavailable</span>
+        <span><i class="k-other"></i>Being booked by someone else</span>
+        <span><svg class="icon"><use href="#i-wheel"/></svg>Wheelchair space</span>
+      </div>
+      <div class="screen" id="screen-label">Screen</div>
+      <div class="rows" id="rows" role="group" aria-label="Seats"></div>
+      <div class="seatmap__foot">
+        <p class="seatmap__picked">Selected <b id="picked-seats">none yet</b></p>
+        <div class="actions">
+          <button class="btn btn--ghost btn--sm" type="button" id="seats-reset"><svg class="icon"><use href="#i-reset"/></svg>Reset</button>
+          <button class="btn btn--ghost btn--sm" type="button" id="seats-back">Back to times</button>
+        </div>
+      </div>
+      <p class="state state--info" id="seat-note" hidden><svg class="icon"><use href="#i-info"/></svg><span></span></p>
+    </div>
+  </div>
+</section>
+
 <section class="course" id="tickets" aria-labelledby="tickets-title" hidden>
   <div class="wrap">
     <div class="course__head"><div class="lead"><h2 id="tickets-title">Tickets</h2><p>How many seats? Seats are held for ten minutes while you pay.</p></div></div>
     <div class="tickets">
       <div class="picker__row">
-        <div class="label">Seats</div>
+        <div class="label">Seats <span>Add or remove with the stepper or on the map</span></div>
         <div class="qty"><button type="button" id="qty-minus" aria-label="Fewer seats"><svg class="icon"><use href="#i-minus"/></svg></button><output id="qty" aria-live="polite">2</output><button type="button" id="qty-plus" aria-label="More seats"><svg class="icon"><use href="#i-plus"/></svg></button></div>
         <p class="seats-line">Seats <b id="seats-list"></b></p>
         <p class="muted" id="qty-note" style="font-size:.9375rem"></p>

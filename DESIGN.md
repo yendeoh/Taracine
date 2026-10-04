@@ -26,6 +26,8 @@ colors:
   placeholder: "#9AA0A8"
   invalid-soft: "#FFF5F4"
   warn-icon: "#C76A00"
+  other-tab: "#FFD9CC"
+  poster-scrim: "rgba(10,11,14,0.92)"
 typography:
   code:
     fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace"
@@ -88,6 +90,10 @@ rounded:
   tile: "20px"
   card: "24px"
   pill: "999px"
+  seat-top: "8px"
+  seat-bottom: "6px"
+  scrollbar-thumb: "10px"
+  screen-bar: "18px"
 spacing:
   "2xs": "4px"
   xs: "8px"
@@ -511,3 +517,8 @@ The sign-in page (`login.html`) introduces text inputs and checkboxes. They foll
 - **Perks list** `.perks`: disc list, 0.875rem `--mid`, used in the format cards and the sign-in aside.
 
 The orange ration is unchanged: the only orange on the sign-in page is the Login button and the checkbox tint when checked.
+
+## Posters and seat map (added)
+
+- **Poster tile** `.tile__art` / `.film__art`: a photograph (`img.photo`, object-fit cover, 2:3) with a title caption `.poster-cap` composited at the bottom: uppercase 700 title, small tracked release line, white on a dark scrim. The scrim is the one place a gradient appears, and it is part of the poster artwork, not UI chrome; the UI itself stays gradient-free.
+- **Seat map** `.seatmap`: hairline-bordered 24px card; legend row; a `.screen` bar in `--panel-2`; rows labelled both sides in `--mid` 0.75rem; seats are 28×26px (22×21 on phones), 8px top radius / 6px bottom. States: available `--ink`, unavailable `--panel-2`, mine `--ok` with a white check, being booked by another tab `#FFD9CC` with a 1px `--accent` inset ring, wheelchair space an outlined glyph. A seat just taken flashes `--accent` once (600ms, two steps). A `.live` indicator (green dot, orange while an update lands) prints the latest event in words.

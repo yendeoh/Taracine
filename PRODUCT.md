@@ -42,7 +42,7 @@ Scope of the first build: Home, Movies listing, Film detail with showtimes picke
 ## Capabilities and Constraints
 
 - Static site: all movie, branch, and showtime data is authored locally (JSON or inline JS) and clearly fictional. No live ticketing, payment, or accounts.
-- Booking flow stops at the showtime selection; the "Buy tickets" action does not complete a purchase.
+- Booking flow runs showtime → seat map → seat hold; the hold is simulated (Promise + timer) and no purchase is completed. Seat availability is generated deterministically per showtime, with a simulated live feed of other customers and real cross-tab sync through BroadcastChannel.
 - Philippine context: peso pricing, local censor ratings (G, PG, R-13, R-16, R-18), Philippine city and mall names for branches.
 - Terminology: "Now showing", "Coming soon", "Cinemas" (branches), "Showtimes", "Experience" (screen formats).
 - Undecided: whether a seat picker screen is built in a later round; whether branch pages get their own route.
@@ -56,7 +56,7 @@ Scope of the first build: Home, Movies listing, Film detail with showtimes picke
 ## Evidence on Hand
 
 - Reference text captures of smcinema.com (home, films, sites, screen-formats, subscription, cinema-points, a film page, a branch page) taken 2026-10-03 via a text proxy; the live site blocks direct fetches.
-- No real movie posters, stills, trailers, logos, or photographs are on hand. Any imagery in the build is authored or sourced as placeholder and must be labeled synthetic. Do not present fictional films, branches, prices, or perks as real claims about any existing cinema.
+- No real movie posters, stills, trailers or logos are on hand. Poster backgrounds are Creative Commons / public-domain photographs from Wikimedia Commons (credits in README.md and assets/posters/credits.json) with the fictional title composited on top; the flat SVG art remains as fallback. Any other imagery must be labeled synthetic. Do not present fictional films, branches, prices, or perks as real claims about any existing cinema.
 
 ## Product Principles
 

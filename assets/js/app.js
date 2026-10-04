@@ -69,10 +69,16 @@
     const line = soon ? `<span class="tile__next soon"><svg class="icon"><use href="#i-cal"/></svg>Opens ${fmtRelease(f.release)}</span>`
       : `<span class="tile__next ${nx.none ? "soon" : ""}"><svg class="icon"><use href="#i-clock"/></svg>${nx.text}</span>`;
     return `<article class="tile" role="listitem" tabindex="0" data-id="${f.id}" aria-pressed="false" aria-label="${f.title}, ${f.rating}">
-      <div class="tile__art"><img src="assets/posters/${f.id}.svg" alt="" width="400" height="600" loading="lazy"><span class="${ratingClass(f.rating)}">${f.rating}</span>
+      <div class="tile__art">${posterImg(f)}<span class="${ratingClass(f.rating)}">${f.rating}</span>
         <a class="tile__open" href="${filmUrl(f)}" aria-label="Open ${f.title}" title="Open"><svg class="icon"><use href="#i-open"/></svg></a></div>
       <div class="tile__body"><span class="tile__title">${f.title}</span><span class="tile__meta"><span>${f.genres.join(" · ")}</span><span>${runtime(f.runtime)}</span></span>${line}</div>
     </article>`;
+  }
+
+  // Poster = photo + title composited in HTML (like a one-sheet). Falls back to the SVG art if the photo is missing.
+  function posterImg(f, lazy = true) {
+    return `<img class="photo" src="assets/posters/photos/${f.id}.jpg" alt="" width="600" height="900" ${lazy ? 'loading="lazy"' : ""} onerror="this.onerror=null;this.src='assets/posters/${f.id}.svg'">
+      <span class="poster-cap" aria-hidden="true"><b>${f.title}</b><small>A Taracine release · ${f.release.slice(0, 4)}</small></span>`;
   }
 
   // select-then-continue
@@ -104,7 +110,7 @@
       $$(".tile[aria-pressed=true]").forEach(x => x.setAttribute("aria-pressed", "false"));
       t.setAttribute("aria-pressed", "true");
       const nx = f.status === "soon" ? null : nextToday(f);
-      showBar({ art: `assets/posters/${f.id}.svg`, title: f.title, sub: f.status === "soon" ? `Opens ${fmtRelease(f.release)} · details and reminders` : `${cinema().name} · ${nx.text}`, label: f.status === "soon" ? "See details" : "Pick a time", href: filmUrl(f) });
+      showBar({ art: `assets/posters/photos/${f.id}.jpg`, title: f.title, sub: f.status === "soon" ? `Opens ${fmtRelease(f.release)} · details and reminders` : `${cinema().name} · ${nx.text}`, label: f.status === "soon" ? "See details" : "Pick a time", href: filmUrl(f) });
     });
     root.addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && e.target.classList.contains("tile")) { e.preventDefault(); e.target.click(); } });
   }
@@ -177,7 +183,9 @@
     const film = D.films.find(f => f.id === params.get("id")) || D.films[0];
     document.title = `${film.title} — Taracine`;
     $("#film-title").textContent = film.title; $("#film-tagline").textContent = film.tagline;
-    const poster = $("#film-poster"); poster.src = `assets/posters/${film.id}.svg`; poster.alt = `Poster art for ${film.title}`;
+    const poster = $("#film-poster"); poster.className = "photo"; poster.src = `assets/posters/photos/${film.id}.jpg`; poster.alt = `Poster for ${film.title}`;
+    poster.onerror = () => { poster.onerror = null; poster.src = `assets/posters/${film.id}.svg`; };
+    poster.insertAdjacentHTML("afterend", `<span class="poster-cap" aria-hidden="true"><b>${film.title}</b><small>A Taracine release · ${film.release.slice(0, 4)}</small></span>`);
     $("#film-chips").innerHTML = `<span class="${ratingClass(film.rating)}" title="${D.ratingDescriptions[film.rating]}">${film.rating}</span>` + film.formats.map(x => `<span class="chip chip--sm">${D.formats[x].name}</span>`).join("");
     $("#film-specs").innerHTML = `
       <div><dt>Runtime</dt><dd>${runtime(film.runtime)}</dd></div>
@@ -212,7 +220,152 @@
     }
     ffEl.addEventListener("click", e => { const b = e.target.closest(".chip"); if (!b) return; focusFormat = b.dataset.f; $$(".chip", ffEl).forEach(x => x.setAttribute("aria-pressed", x === b)); $$(".group", sessionsEl).forEach(g => g.classList.toggle("dim", !!focusFormat && g.dataset.format !== focusFormat)); });
 
-    function resetChoice() { chosen = null; seats = []; stopHold(); holdState = "idle"; }
+    function resetChoice() { chosen = null; seats = []; stopHold(); holdState = "idle"; stopFeed(); }
+
+    /* ===== Seat map with live updates =====
+       The map is generated per format. Seats already sold are decided deterministically from the showtime so the
+       demo is stable. Two things make it "live":
+       1. Lesson: setInterval() — a simulated stream of other customers books a free seat every few seconds while you
+          look (stopped with clearInterval when you leave the step). If one of YOUR unsaved seats is taken, it is
+          replaced and the page says so inline.
+       2. BroadcastChannel — real cross-tab sync: open the same showtime in two tabs and each tab sees the other's
+          selection as "being booked by someone else". */
+    const LAYOUTS = {
+      standard: { rows: "ABCDEFGHJ", per: 17, walkwayAfter: "C", wheelchairRow: "C", lastRow: [4, 4] },
+      grand:    { rows: "ABCDEFGHJKL", per: 20, walkwayAfter: "D", wheelchairRow: "D", lastRow: [6, 6] },
+      wrap:     { rows: "ABCDEFGH", per: 16, walkwayAfter: "C", wheelchairRow: "C", lastRow: [5, 5] },
+      salon:    { rows: "ABCDE", per: 8, walkwayAfter: "B", wheelchairRow: "B", lastRow: null }
+    };
+    let seatMap = null;
+    let others = {};
+    let feedTimer = null;
+    const tabId = Math.random().toString(36).slice(2, 8);
+    let channel = null;
+    try { channel = new BroadcastChannel("taracine-seats"); } catch (e) {}
+    const rowsEl = $("#rows"), seatsSec = $("#seats"), pickedEl = $("#picked-seats"), seatNote = $("#seat-note"), liveEl = $("#live");
+
+    function showtimeKey() { return chosen ? `${film.id}|${myCinema}|${dateIso}|${chosen.format}|${chosen.h}:${chosen.m}` : ""; }
+    function buildMap() {
+      const L = LAYOUTS[chosen.format] || LAYOUTS.standard;
+      const key = showtimeKey();
+      const map = new Map();
+      const capacity = L.rows.length * L.per;
+      const soldShare = Math.max(0.05, Math.min(0.9, 1 - chosen.seats / capacity));
+      for (const row of L.rows) {
+        const isLast = L.lastRow && row === L.rows[L.rows.length - 1];
+        for (let n = 1; n <= L.per; n++) {
+          if (isLast && n > L.lastRow[0] && n <= L.per - L.lastRow[1]) continue;
+          const wheel = row === L.wheelchairRow && n > L.per - 2;
+          const taken = !wheel && (D.hash(key + row + n) % 1000) / 1000 < soldShare;
+          map.set(`${row}${n}`, { row, n, wheel, state: taken ? "taken" : "free" });
+        }
+      }
+      seatMap = { key, layout: L, seats: map };
+      $("#screen-label").textContent = `${D.formats[chosen.format].name} · screen`;
+      const gapRow = L.walkwayAfter ? L.rows[L.rows.indexOf(L.walkwayAfter) + 1] : null;
+      rowsEl.innerHTML = L.rows.split("").map(row => {
+        const cells = [];
+        for (let n = 1; n <= L.per; n++) {
+          const id = `${row}${n}`, st = map.get(id);
+          if (!st) { cells.push(`<span class="seat aisle" aria-hidden="true"></span>`); continue; }
+          cells.push(`<button type="button" class="seat ${st.wheel ? "wheel" : ""}" data-id="${id}" aria-label="Seat ${id}${st.wheel ? ", wheelchair space" : ""}" aria-pressed="false">${st.wheel ? '<svg class="icon"><use href="#i-wheel"/></svg>' : ""}</button>`);
+        }
+        return `<div class="row ${row === gapRow ? "gap" : ""}"><small>${row}</small><div class="row__seats">${cells.join("")}</div><small>${row}</small></div>`;
+      }).join("");
+      seats = [];
+      const midRows = L.rows.split("").slice(Math.floor(L.rows.length / 2));
+      outer: for (const row of midRows) {
+        for (let n = Math.ceil(L.per / 2) - 1; n < L.per; n++) {
+          const a = map.get(`${row}${n}`), b = map.get(`${row}${n + 1}`);
+          if (a && b && a.state === "free" && b.state === "free" && !a.wheel && !b.wheel) { seats.push(`${row}${n}`); seats.push(`${row}${n + 1}`); break outer; }  // Lesson: push()
+        }
+      }
+      seatNote.hidden = true;
+      paintSeats(); startFeed(); broadcast();
+    }
+    function paintSeats() {
+      if (!seatMap) return;
+      const otherSet = new Set(Object.values(others).flat());
+      const locked = holdState === "holding" || holdState === "held";
+      $$(".seat[data-id]", rowsEl).forEach(el => {
+        const st = seatMap.seats.get(el.dataset.id);
+        const mine = seats.includes(el.dataset.id);
+        el.classList.toggle("taken", st.state === "taken");
+        el.classList.toggle("other", !mine && st.state !== "taken" && otherSet.has(el.dataset.id));
+        el.classList.toggle("mine", mine);
+        el.setAttribute("aria-pressed", mine);
+        el.disabled = st.state === "taken" || (!mine && otherSet.has(el.dataset.id)) || locked;
+      });
+      pickedEl.textContent = seats.length ? seats.join(", ") : "none yet";
+    }
+    function nextFreeSeat() {
+      if (!seatMap) return null;
+      const otherSet = new Set(Object.values(others).flat());
+      const ok = id => { const c = seatMap.seats.get(id); return c && c.state === "free" && !c.wheel && !seats.includes(id) && !otherSet.has(id); };
+      const last = seats[seats.length - 1];
+      if (last) {
+        const st = seatMap.seats.get(last), L = seatMap.layout, rows = L.rows;
+        // nearest first: walk outward along the same row, then the neighbouring rows
+        for (let dist = 1; dist < L.per; dist++) for (const d of [dist, -dist]) { const cand = `${st.row}${st.n + d}`; if (ok(cand)) return cand; }
+        const r = rows.indexOf(st.row);
+        for (let dr = 1; dr < rows.length; dr++) for (const rr of [rows[r + dr], rows[r - dr]]) { if (!rr) continue; for (let dist = 0; dist < L.per; dist++) for (const d of [dist, -dist]) { const cand = `${rr}${st.n + d}`; if (ok(cand)) return cand; } }
+      }
+      for (const id of seatMap.seats.keys()) if (ok(id)) return id;
+      return null;
+    }
+    function note(text, kind = "info") { seatNote.hidden = false; seatNote.className = `state state--${kind}`; seatNote.querySelector("span").textContent = text; }
+    function broadcast() { if (channel && chosen) channel.postMessage({ type: "select", key: showtimeKey(), tab: tabId, seats: [...seats] }); }
+    if (channel) channel.onmessage = (ev) => {
+      const m = ev.data || {};
+      if (m.tab === tabId) return;
+      if (m.type === "select") { if (m.key === showtimeKey()) others[m.tab] = m.seats; else delete others[m.tab]; }
+      if (m.type === "clear") delete others[m.tab];
+      if (m.type === "ping" && chosen) broadcast();
+      paintSeats();
+      const overlap = seats.filter(x => Object.values(others).flat().includes(x));
+      if (overlap.length) { liveEl.classList.add("busy"); liveEl.querySelector("span").textContent = `Another tab is also looking at ${overlap.join(", ")}`; }
+    };
+    if (channel) channel.postMessage({ type: "ping", tab: tabId });
+    addEventListener("pagehide", () => { if (channel) channel.postMessage({ type: "clear", tab: tabId }); });
+
+    // Lesson: setInterval() runs the simulated live feed; clearInterval() stops it when the step is left
+    function startFeed() {
+      stopFeed();
+      liveEl.classList.remove("busy"); liveEl.querySelector("span").textContent = "Live · seats update as others book";
+      feedTimer = setInterval(() => {
+        if (!seatMap) return;
+        const free = [...seatMap.seats.entries()].filter(([id, st]) => st.state === "free" && !st.wheel);
+        if (!free.length) { stopFeed(); return; }
+        const locked = holdState === "holding" || holdState === "held";
+        let targetId;
+        if (!locked && seats.length && Math.random() < 0.16) targetId = seats[seats.length - 1];
+        else { const pool = free.filter(([id]) => !seats.includes(id)); if (!pool.length) return; targetId = pool[Math.floor(Math.random() * pool.length)][0]; }
+        seatMap.seats.get(targetId).state = "taken";
+        const el = rowsEl.querySelector(`.seat[data-id="${targetId}"]`); if (el) { el.classList.add("flash"); setTimeout(() => el.classList.remove("flash"), 700); }
+        liveEl.classList.add("busy"); liveEl.querySelector("span").textContent = `Someone just booked ${targetId}`;
+        setTimeout(() => liveEl.classList.remove("busy"), 1500);
+        if (seats.includes(targetId)) {
+          seats.splice(seats.indexOf(targetId), 1);
+          const repl = nextFreeSeat(); if (repl) seats.push(repl);               // Lesson: push() the replacement seat
+          note(`${targetId} was just taken by another customer${repl ? `, so we moved you to ${repl}` : ""}. Hold your seats to keep them.`, "warn");
+        }
+        paintSeats(); paintTickets(); broadcast();
+      }, 3500 + Math.random() * 2500);
+    }
+    function stopFeed() { if (feedTimer) { clearInterval(feedTimer); feedTimer = null; } }
+
+    // Lesson: Event Delegation — one listener on the rows container handles every seat button
+    rowsEl.addEventListener("click", event => {
+      const el = event.target.closest(".seat[data-id]"); if (!el || el.disabled) return;
+      const id = el.dataset.id;
+      if (seats.includes(id)) seats.splice(seats.indexOf(id), 1);
+      else if (seats.length >= 6) { note("Up to 6 seats per booking. Remove one to pick another.", "warn"); return; }
+      else seats.push(id);                                                       // Lesson: push()
+      seatNote.hidden = true;
+      paintSeats(); paintTickets(); broadcast();
+    });
+    $("#seats-reset").addEventListener("click", () => { if (holdState === "holding" || holdState === "held") return; seats = []; seatNote.hidden = true; paintSeats(); paintTickets(); broadcast(); });
+    $("#seats-back").addEventListener("click", () => { resetChoice(); $$(".time", sessionsEl).forEach(x => x.setAttribute("aria-pressed", "false")); paintTickets(); $("#sessions").scrollIntoView({ behavior: "smooth", block: "start" }); });
 
     function paintSessions() {
       const c = cinema();
@@ -259,49 +412,46 @@
       const same = chosen && chosen.format === b.dataset.format && chosen.h === +b.dataset.h && chosen.m === +b.dataset.m;
       resetChoice();
       chosen = same ? null : { format: b.dataset.format, h: +b.dataset.h, m: +b.dataset.m, seats: +b.dataset.seats };
-      if (chosen) { seats.push(seatLabel(0)); seats.push(seatLabel(1)); }   // Lesson: push() — start with two seats
       $$(".time", sessionsEl).forEach(x => x.setAttribute("aria-pressed", x === b && !same));
+      if (chosen) buildMap(); else seatMap = null;
       paintTickets();
+      if (chosen) setTimeout(() => seatsSec.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
     });
 
-    // seat labels are deterministic per showtime so the demo is stable: row from the format, numbers from the hash
-    function seatLabel(i) {
-      const row = { standard: "H", grand: "J", wrap: "F", salon: "B" }[chosen.format] || "G";
-      const start = 3 + (D.hash(film.id + chosen.h + chosen.m) % 9);
-      return `${row}${start + i}`;
-    }
 
     // --- tickets ---
     const ticketsSec = $("#tickets"), summary = $("#summary"), qtyOut = $("#qty"), holdEl = $("#hold-state"), qtyNote = $("#qty-note"), seatsOut = $("#seats-list");
     function paintTickets() {
       const s2 = $("#step-2"), s3 = $("#step-3");
       if (!chosen) {
-        ticketsSec.hidden = true; s2.setAttribute("aria-current", "step"); s2.classList.remove("done"); s2.querySelector("b").textContent = "2"; s3.removeAttribute("aria-current");
-        if (film.status === "now") showBar({ art: `assets/posters/${film.id}.svg`, title: film.title, sub: `${cinema().name} · ${fmtDay(dateIso)} · pick a time`, label: "Pick a time" });
+        ticketsSec.hidden = true; seatsSec.hidden = true; s2.setAttribute("aria-current", "step"); s2.classList.remove("done"); s2.querySelector("b").textContent = "2"; s3.removeAttribute("aria-current");
+        if (film.status === "now") showBar({ art: `assets/posters/photos/${film.id}.jpg`, title: film.title, sub: `${cinema().name} · ${fmtDay(dateIso)} · pick a time`, label: "Pick a time" });
         else hideBar();
         const btn = $("#continue-btn"); btn.disabled = false; btn.onclick = () => $("#sessions").scrollIntoView({ behavior: "smooth", block: "start" });
         return;
       }
       const F = D.formats[chosen.format];
       const qty = seats.length;
-      ticketsSec.hidden = false; s2.removeAttribute("aria-current"); s2.classList.add("done"); s2.querySelector("b").innerHTML = `<svg class="icon"><use href="#i-check"/></svg>`; s3.setAttribute("aria-current", "step");
+      ticketsSec.hidden = false; seatsSec.hidden = false; s2.removeAttribute("aria-current"); s2.classList.add("done"); s2.querySelector("b").innerHTML = `<svg class="icon"><use href="#i-check"/></svg>`; s3.setAttribute("aria-current", "step");
       const max = Math.min(6, chosen.seats);
       const locked = holdState === "holding" || holdState === "held";
-      $("#qty-minus").disabled = qty <= 1 || locked; $("#qty-plus").disabled = qty >= max || locked; qtyOut.textContent = qty;
+      $("#qty-minus").disabled = qty <= 1 || locked; $("#qty-plus").disabled = qty >= max || locked || !nextFreeSeat(); qtyOut.textContent = qty;
+      paintSeats();
       seatsOut.textContent = seats.join(", ");
       qtyNote.textContent = `${chosen.seats} seats available in ${F.name}. Up to 6 per booking.`;
       summary.innerHTML = `<div class="row"><span>Film</span><b>${film.title}</b></div><div class="row"><span>Cinema</span><b>${cinema().name}</b></div><div class="row"><span>When</span><b>${fmtDay(dateIso)} · ${D.fmtTime(chosen.h, chosen.m)}</b></div><div class="row"><span>Format</span><b>${F.name}</b></div><div class="row"><span>Seats</span><b>${seats.join(", ")}</b></div><div class="row"><span>Price</span><b>${qty} × ${D.peso(F.price)}</b></div><div class="row total"><span>Total</span><b>${D.peso(F.priceFor(qty))}</b></div>`;
       const label = holdState === "holding" ? "Holding…" : holdState === "held" ? `Held · ${mmss(holdSecondsLeft)}` : holdState === "expired" ? "Hold again" : "Buy tickets";
-      showBar({ art: `assets/posters/${film.id}.svg`, title: `${film.title} · ${D.fmtTime(chosen.h, chosen.m)}`, sub: `${cinema().name} · ${fmtDay(dateIso)} · ${F.name} · ${qty} seat${qty > 1 ? "s" : ""} · ${D.peso(F.priceFor(qty))}`, label });
+      showBar({ art: `assets/posters/photos/${film.id}.jpg`, title: `${film.title} · ${D.fmtTime(chosen.h, chosen.m)}`, sub: `${cinema().name} · ${fmtDay(dateIso)} · ${F.name} · ${qty} seat${qty > 1 ? "s" : ""} · ${D.peso(F.priceFor(qty))}`, label });
       const btn = $("#continue-btn");
-      btn.disabled = locked;
+      btn.disabled = locked || qty === 0;
+      if (qty === 0 && !locked) btn.innerHTML = `Pick a seat first<svg class="icon"><use href="#i-arrow"/></svg>`;
       btn.onclick = () => {
         if (ticketsSec.getBoundingClientRect().top > innerHeight * 0.6) ticketsSec.scrollIntoView({ behavior: "smooth", block: "start" });
         hold();
       };
     }
-    $("#qty-minus").addEventListener("click", () => { if (seats.length > 1) seats.pop(); paintTickets(); });          // Lesson: pop() removes the last seat
-    $("#qty-plus").addEventListener("click", () => { if (chosen && seats.length < Math.min(6, chosen.seats)) seats.push(seatLabel(seats.length)); paintTickets(); }); // Lesson: push() adds the next seat
+    $("#qty-minus").addEventListener("click", () => { if (seats.length > 1) seats.pop(); paintTickets(); broadcast(); });          // Lesson: pop() removes the last seat
+    $("#qty-plus").addEventListener("click", () => { const nxt = nextFreeSeat(); if (chosen && nxt && seats.length < Math.min(6, chosen.seats)) seats.push(nxt); paintTickets(); broadcast(); }); // Lesson: push() adds the next free seat
 
     function mmss(s) { return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; }
     function stopHold() { if (holdTimer) { clearInterval(holdTimer); holdTimer = null; } holdEl.hidden = true; holdEl.className = "state"; }
@@ -314,7 +464,7 @@
       holdEl.hidden = false; holdEl.className = "state state--info"; holdEl.innerHTML = `<svg class="icon"><use href="#i-clock"/></svg><span>Holding your seats…</span>`;
       try {
         const result = await D.holdSeats(seats);
-        holdState = "held"; holdSecondsLeft = result.minutes * 60;
+        holdState = "held"; holdSecondsLeft = result.minutes * 60; broadcast();
         holdEl.className = "state"; holdEl.innerHTML = `<svg class="icon"><use href="#i-check"/></svg><span>Seats ${result.seats.join(", ")} held for ${result.minutes} minutes. In the real flow, payment opens here; this study stops at the hold.</span>`;
         holdTimer = setInterval(() => {
           holdSecondsLeft--;
