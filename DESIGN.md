@@ -522,3 +522,9 @@ The orange ration is unchanged: the only orange on the sign-in page is the Login
 
 - **Poster tile** `.tile__art` / `.film__art`: a photograph (`img.photo`, object-fit cover, 2:3) with a title caption `.poster-cap` composited at the bottom: uppercase 700 title, small tracked release line, white on a dark scrim. The scrim is the one place a gradient appears, and it is part of the poster artwork, not UI chrome; the UI itself stays gradient-free.
 - **Seat map** `.seatmap`: hairline-bordered 24px card; legend row; a `.screen` bar in `--panel-2`; rows labelled both sides in `--mid` 0.75rem; seats are 28×26px (22×21 on phones), 8px top radius / 6px bottom. States: available `--ink`, unavailable `--panel-2`, mine `--ok` with a white check, being booked by another tab `#FFD9CC` with a 1px `--accent` inset ring, wheelchair space an outlined glyph. A seat just taken flashes `--accent` once (600ms, two steps). A `.live` indicator (green dot, orange while an update lands) prints the latest event in words.
+
+## Cinemas and Experience pages (added)
+
+- **Cinemas page**: the `.cinema` card grows a `.cinema__today` line (hairline above, `--mid` text with ink bolds) and an actions pair (Choose + Showtimes). A `.search` text input and region chips lead the course; the empty state reuses `.empty`.
+- **Experience page**: one `.xp__item` per screen format, a two-column hairline card (icon + name + price, blurb, perks | a `--panel` aside with "Where to find it" chips and the week's titles). Stacks to one column under 820px.
+- **Real posters**: when a film carries a studio one-sheet, the tile shows it uncaptioned; the photo + `.poster-cap` treatment is only for the fictional films.

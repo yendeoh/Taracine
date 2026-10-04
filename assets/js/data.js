@@ -38,7 +38,321 @@ window.TARACINE = (function () {
   const formats = {};
   screens.forEach(screen => { formats[screen.id] = screen; });
 
-  const films = [
+  /* Films currently showing at SM Cinema (smcinema.com, captured 2026-10-04). Titles, ratings, runtimes, cast and
+     synopses are from the SM Cinema listing; posters are hotlinked from SM Cinema's media CDN and belong to the films'
+     studios. They appear in this study to show the booking flow with real releases; Taracine does not screen them. */
+  const realFilms = [
+      {
+          "id": "always-yours-never-mine",
+          "title": "Always Yours, Never Mine",
+          "status": "now",
+          "rating": "PG",
+          "runtime": 112,
+          "release": "2026-09-30",
+          "genres": [
+              "Drama"
+          ],
+          "formats": [
+              "standard",
+              "grand"
+          ],
+          "cast": [
+              "Julia Barretto",
+              "Joshua Garcia",
+              "Bianca Umali"
+          ],
+          "director": "",
+          "tagline": "",
+          "synopsis": [
+              "Across thirty years, several almosts, and timing that is never quite right, two people keep crossing paths – always on the verge of being together, but never quite making it. But when life finally offers them one last chance to rewrite their story, will they finally make the one choice they have spent a lifetime avoiding?"
+          ],
+          "palette": [
+              "#111111",
+              "#333333",
+              "#EEEEEE"
+          ],
+          "motif": "reel",
+          "source": "smcinema",
+          "poster": "https://smcine-digital-cdn.app.vista.co/media/entity/get/FilmPosterGraphic/HO00001652?width=600",
+          "sourceUrl": "https://www.smcinema.com/films/Always-Yours-Never-Mine/HO00001652"
+      },
+      {
+          "id": "avengers-endgame-encore",
+          "title": "Avengers Endgame: Encore",
+          "status": "now",
+          "rating": "PG",
+          "runtime": 183,
+          "release": "2026-09-23",
+          "genres": [
+              "Action",
+              "Adventure"
+          ],
+          "formats": [
+              "standard",
+              "grand",
+              "wrap"
+          ],
+          "cast": [
+              "Chris Evans",
+              "Chris Hemsworth",
+              "Mark Ruffalo",
+              "Robert Downey Jr."
+          ],
+          "director": "",
+          "tagline": "",
+          "synopsis": [
+              "After the devastating events of Avengers: Infinity War (2018), the universe is in ruins. With the help of remaining allies, the Avengers assemble once more in order to reverse Thanos' actions and restore balance to the universe."
+          ],
+          "palette": [
+              "#111111",
+              "#333333",
+              "#EEEEEE"
+          ],
+          "motif": "reel",
+          "source": "smcinema",
+          "poster": "https://smcine-digital-cdn.app.vista.co/media/entity/get/FilmPosterGraphic/HO00001643?width=600",
+          "sourceUrl": "https://www.smcinema.com/films/Avengers-Endgame-Encore/HO00001643"
+      },
+      {
+          "id": "chiikawa-the-movie-the-secret-of-mermaid-island",
+          "title": "Chiikawa the Movie: The Secret of Mermaid Island",
+          "status": "now",
+          "rating": "PG",
+          "runtime": 99,
+          "release": "2026-09-30",
+          "genres": [
+              "Anime"
+          ],
+          "formats": [
+              "standard"
+          ],
+          "cast": [
+              "Tsuguo Mogami",
+              "Minori Suzuki",
+              "Haruka Aoki"
+          ],
+          "director": "",
+          "tagline": "",
+          "synopsis": [
+              "Chiikawa and friends suddenly find an invitation to a \"Special Island\" with promises of rewards and free food. Lured by its temptations, the group set sail for the island alongside Rakko, who remains suspicious of the brochure's claims."
+          ],
+          "palette": [
+              "#111111",
+              "#333333",
+              "#EEEEEE"
+          ],
+          "motif": "reel",
+          "source": "smcinema",
+          "poster": "https://smcine-digital-cdn.app.vista.co/media/entity/get/FilmPosterGraphic/HO00001658?width=600",
+          "sourceUrl": "https://www.smcinema.com/films/Chiikawa-the-Movie-The-Secret-of-Mermaid-Island/HO00001658"
+      },
+      {
+          "id": "digger",
+          "title": "Digger",
+          "status": "now",
+          "rating": "R-13",
+          "runtime": 131,
+          "release": "2026-10-02",
+          "genres": [
+              "Comedy"
+          ],
+          "formats": [
+              "standard"
+          ],
+          "cast": [
+              "Tom Cruise",
+              "John Goodman",
+              "Riz Ahmed"
+          ],
+          "director": "",
+          "tagline": "",
+          "synopsis": [
+              "The most powerful man in the world embarks on a frantic mission to prove he is humanity's savior before the disaster he's unleashed destroys everything."
+          ],
+          "palette": [
+              "#111111",
+              "#333333",
+              "#EEEEEE"
+          ],
+          "motif": "reel",
+          "source": "smcinema",
+          "poster": "https://smcine-digital-cdn.app.vista.co/media/entity/get/FilmPosterGraphic/HO00001610?width=600",
+          "sourceUrl": "https://www.smcinema.com/films/Digger/HO00001610"
+      },
+      {
+          "id": "forgotten-island",
+          "title": "Forgotten Island",
+          "status": "now",
+          "rating": "PG",
+          "runtime": 109,
+          "release": "2026-09-19",
+          "genres": [
+              "Animation"
+          ],
+          "formats": [
+              "standard",
+              "grand"
+          ],
+          "cast": [
+              "Dolly De Leon",
+              "Liza Soberano",
+              "Dave Franco",
+              "Lea Salonga"
+          ],
+          "director": "",
+          "tagline": "",
+          "synopsis": [
+              "Two best friends become stranded on the mystical world of Nakali, where their only escape might cost them their shared lifetime of memories."
+          ],
+          "palette": [
+              "#111111",
+              "#333333",
+              "#EEEEEE"
+          ],
+          "motif": "reel",
+          "source": "smcinema",
+          "poster": "https://smcine-digital-cdn.app.vista.co/media/entity/get/FilmPosterGraphic/HO00001606?width=600",
+          "sourceUrl": "https://www.smcinema.com/films/Forgotten-Island/HO00001606"
+      },
+      {
+          "id": "heart-of-the-beast",
+          "title": "Heart of the Beast",
+          "status": "now",
+          "rating": "R-13",
+          "runtime": 101,
+          "release": "2026-09-19",
+          "genres": [
+              "Action"
+          ],
+          "formats": [
+              "standard",
+              "grand"
+          ],
+          "cast": [
+              "Brad Pitt",
+              "J.K. Simmons",
+              "Anna Lambe"
+          ],
+          "director": "",
+          "tagline": "",
+          "synopsis": [
+              "After a harrowing plane crash, a Special Forces officer and his combat dog find themselves stranded deep in the Alaskan wilderness. Together, they are forced into a brutal fight for survival against the elements."
+          ],
+          "palette": [
+              "#111111",
+              "#333333",
+              "#EEEEEE"
+          ],
+          "motif": "reel",
+          "source": "smcinema",
+          "poster": "https://smcine-digital-cdn.app.vista.co/media/entity/get/FilmPosterGraphic/HO00001611?width=600",
+          "sourceUrl": "https://www.smcinema.com/films/Heart-of-the-Beast/HO00001611"
+      },
+      {
+          "id": "primetime",
+          "title": "Primetime",
+          "status": "now",
+          "rating": "R-16",
+          "runtime": 109,
+          "release": "2026-09-30",
+          "genres": [
+              "Drama"
+          ],
+          "formats": [
+              "standard",
+              "salon"
+          ],
+          "cast": [
+              "Robert Pattinson",
+              "Merritt Wever",
+              "Skyler Gisondo"
+          ],
+          "director": "",
+          "tagline": "",
+          "synopsis": [
+              "In 2006, To Catch a Predator host Chris Hansen sets out to make television history."
+          ],
+          "palette": [
+              "#111111",
+              "#333333",
+              "#EEEEEE"
+          ],
+          "motif": "reel",
+          "source": "smcinema",
+          "poster": "https://smcine-digital-cdn.app.vista.co/media/entity/get/FilmPosterGraphic/HO00001664?width=600",
+          "sourceUrl": "https://www.smcinema.com/films/Primetime/HO00001664"
+      },
+      {
+          "id": "resident-evil",
+          "title": "Resident Evil",
+          "status": "now",
+          "rating": "R-16",
+          "runtime": 96,
+          "release": "2026-09-16",
+          "genres": [
+              "Horror"
+          ],
+          "formats": [
+              "standard",
+              "salon"
+          ],
+          "cast": [
+              "Paul Walter Hauser",
+              "Austin Abrams",
+              "Zach Cherry"
+          ],
+          "director": "",
+          "tagline": "",
+          "synopsis": [
+              "From the mind of visionary filmmaker Zach Cregger (Weapons, Barbarian) comes a thrilling — and terrifying — reinvention of the Resident Evil franchise. In an all-new story, Resident Evil follows Bryan, a medical courier who unwittingly finds himself in an action-packed, non-stop race for survival as one fateful, horrifying night collapses around him in chaos."
+          ],
+          "palette": [
+              "#111111",
+              "#333333",
+              "#EEEEEE"
+          ],
+          "motif": "reel",
+          "source": "smcinema",
+          "poster": "https://smcine-digital-cdn.app.vista.co/media/entity/get/FilmPosterGraphic/HO00001626?width=600",
+          "sourceUrl": "https://www.smcinema.com/films/Resident-Evil/HO00001626"
+      },
+      {
+          "id": "verity",
+          "title": "Verity",
+          "status": "now",
+          "rating": "R-16",
+          "runtime": 117,
+          "release": "2026-09-30",
+          "genres": [
+              "Thriller"
+          ],
+          "formats": [
+              "standard",
+              "salon"
+          ],
+          "cast": [
+              "Josh Harnett",
+              "Dakota Johnson",
+              "Anne Hathaway"
+          ],
+          "director": "",
+          "tagline": "",
+          "synopsis": [
+              "Lowen Ashleigh gets hired by Jeremy Crawford to ghostwrite novels for his bestselling author wife Verity, who's unable to finish after an accident. Lowen uncovers Verity's disturbing truths while residing at the Crawfords' home to work."
+          ],
+          "palette": [
+              "#111111",
+              "#333333",
+              "#EEEEEE"
+          ],
+          "motif": "reel",
+          "source": "smcinema",
+          "poster": "https://smcine-digital-cdn.app.vista.co/media/entity/get/FilmPosterGraphic/HO00001628?width=600",
+          "sourceUrl": "https://www.smcinema.com/films/Verity/HO00001628"
+      }
+  ];
+
+  const fictionalFilms = [
     { id: "sa-dulo-ng-dagat", title: "Sa Dulo ng Dagat", status: "now", rating: "PG", runtime: 118, release: "2026-09-17", genres: ["Romance", "Drama"], formats: ["standard", "grand"], cast: ["Mara Villanueva", "Jerome Dizon", "Celeste Abad"], director: "Lia Trinidad", tagline: "Some tides only return once.", synopsis: ["A marine biologist returns to the fishing town she left at seventeen to close her late father's boatyard, and finds the boy who stayed behind now runs the only ferry out.", "Shot across one monsoon season in Quezon province, the film follows two people deciding whether home is a place or a person."], palette: ["#0F3A5F", "#F2A65A", "#F6EBDC"], motif: "sea" },
     { id: "lakbay-bituin", title: "Lakbay Bituin", status: "now", rating: "G", runtime: 96, release: "2026-09-24", genres: ["Animation", "Adventure"], formats: ["standard", "grand", "wrap"], cast: ["Voices of Ana Reyes", "Kiko Manalo", "Dolores Ong"], director: "Paolo Santiago", tagline: "Ten-year-old Tala builds a rocket out of a tricycle.", synopsis: ["When the town's last streetlight burns out, Tala decides the stars are simply too far away and sets out to bring one home, with her grandfather's tricycle, a kite, and a very reluctant goat.", "A hand-drawn animated adventure about distance, light, and the engineering of hope."], palette: ["#1B2550", "#F6C945", "#F28A2E"], motif: "rocket" },
     { id: "manila-static", title: "Manila Static", status: "now", rating: "R-16", runtime: 127, release: "2026-09-10", genres: ["Thriller"], formats: ["standard", "salon"], cast: ["Diego Alcantara", "Rhea Buenaventura", "Oscar Lim"], director: "Carlo Ventura", tagline: "Every frequency in the city is listening.", synopsis: ["A night-shift radio engineer intercepts a numbers broadcast that predicts a kidnapping three hours before it happens. Then another. The station's owner wants it quiet; the kidnappers want it quieter.", "A tight procedural set across one week of Metro Manila static."], palette: ["#121212", "#E8352B", "#D9D4C7"], motif: "wave" },
@@ -61,17 +375,19 @@ window.TARACINE = (function () {
     { id: "luzviminda", title: "Luzviminda", status: "soon", rating: "PG", runtime: 138, release: "2026-12-03", genres: ["Anthology", "Drama"], formats: ["standard", "grand"], cast: ["Ensemble cast"], director: "Lia Trinidad, Isabel Cruz, Teo Agbayani", tagline: "Three islands. Three directors. One night.", synopsis: ["Three stories set on the same night in Luzon, Visayas and Mindanao, each by a different director, each ending at the same sunrise.", "An anthology for the holiday season."], palette: ["#1F6F63", "#E58C74", "#F6C945"], motif: "islands" }
   ];
 
+  const films = realFilms.concat(fictionalFilms);
+
   const cinemas = [
-    { id: "cubao", name: "Taracine Cubao", city: "Quezon City", address: "Araneta City, General Roxas Ave, Cubao", formats: ["standard", "grand", "wrap", "salon"], screens: 10 },
-    { id: "ortigas", name: "Taracine Ortigas", city: "Pasig", address: "Ortigas Center, Emerald Ave corner Garnet Rd", formats: ["standard", "grand", "salon"], screens: 8 },
-    { id: "bgc", name: "Taracine High Street", city: "Taguig", address: "Bonifacio High Street, 9th Ave, BGC", formats: ["standard", "grand", "wrap", "salon"], screens: 9 },
-    { id: "alabang", name: "Taracine Alabang", city: "Muntinlupa", address: "Alabang Town Center, Alabang-Zapote Rd", formats: ["standard", "grand"], screens: 6 },
-    { id: "quezon-ave", name: "Taracine Quezon Avenue", city: "Quezon City", address: "Quezon Ave corner Scout Borromeo", formats: ["standard", "salon"], screens: 6 },
-    { id: "cebu", name: "Taracine Cebu IT Park", city: "Cebu City", address: "Cebu IT Park, Lahug", formats: ["standard", "grand", "wrap"], screens: 8 },
-    { id: "davao", name: "Taracine Lanang", city: "Davao City", address: "J.P. Laurel Ave, Lanang", formats: ["standard", "grand"], screens: 6 },
-    { id: "baguio", name: "Taracine Session Road", city: "Baguio", address: "Session Rd corner Calderon St", formats: ["standard"], screens: 4 },
-    { id: "iloilo", name: "Taracine Esplanade", city: "Iloilo City", address: "Diversion Rd, Mandurriao", formats: ["standard", "grand"], screens: 6 },
-    { id: "clark", name: "Taracine Clark", city: "Pampanga", address: "M.A. Roxas Highway, Clark Freeport", formats: ["standard", "grand", "wrap"], screens: 7 }
+    { id: "cubao", name: "Taracine Cubao", city: "Quezon City", region: "Metro Manila", address: "Araneta City, General Roxas Ave, Cubao", formats: ["standard", "grand", "wrap", "salon"], screens: 10 },
+    { id: "ortigas", name: "Taracine Ortigas", city: "Pasig", region: "Metro Manila", address: "Ortigas Center, Emerald Ave corner Garnet Rd", formats: ["standard", "grand", "salon"], screens: 8 },
+    { id: "bgc", name: "Taracine High Street", city: "Taguig", region: "Metro Manila", address: "Bonifacio High Street, 9th Ave, BGC", formats: ["standard", "grand", "wrap", "salon"], screens: 9 },
+    { id: "alabang", name: "Taracine Alabang", city: "Muntinlupa", region: "Metro Manila", address: "Alabang Town Center, Alabang-Zapote Rd", formats: ["standard", "grand"], screens: 6 },
+    { id: "quezon-ave", name: "Taracine Quezon Avenue", city: "Quezon City", region: "Metro Manila", address: "Quezon Ave corner Scout Borromeo", formats: ["standard", "salon"], screens: 6 },
+    { id: "cebu", name: "Taracine Cebu IT Park", city: "Cebu City", region: "Visayas", address: "Cebu IT Park, Lahug", formats: ["standard", "grand", "wrap"], screens: 8 },
+    { id: "davao", name: "Taracine Lanang", city: "Davao City", region: "Mindanao", address: "J.P. Laurel Ave, Lanang", formats: ["standard", "grand"], screens: 6 },
+    { id: "baguio", name: "Taracine Session Road", city: "Baguio", region: "Luzon", address: "Session Rd corner Calderon St", formats: ["standard"], screens: 4 },
+    { id: "iloilo", name: "Taracine Esplanade", city: "Iloilo City", region: "Visayas", address: "Diversion Rd, Mandurriao", formats: ["standard", "grand"], screens: 6 },
+    { id: "clark", name: "Taracine Clark", city: "Pampanga", region: "Luzon", address: "M.A. Roxas Highway, Clark Freeport", formats: ["standard", "grand", "wrap"], screens: 7 }
   ];
 
   const ratingDescriptions = {

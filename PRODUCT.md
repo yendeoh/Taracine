@@ -37,11 +37,11 @@ Reference site structure (SM Cinema, captured 2026-10-03):
 - Membership: Premium Member 1 Year, PHP 1,200.00; perks include free popcorn and drink upgrade per visit, free birth-month ticket, double points; 1 point = 1 peso.
 - Seat picker exists on the booking flow.
 
-Scope of the first build: Home, Movies listing, Film detail with showtimes picker. Cinemas, Experience, Membership, and seat picker are later surfaces.
+Built surfaces: Home, Movies, Film detail (showtimes → live seat map → hold), Cinemas, Experience, Sign in. Membership page and payment/concessions remain unbuilt.
 
 ## Capabilities and Constraints
 
-- Static site: all movie, branch, and showtime data is authored locally (JSON or inline JS) and clearly fictional. No live ticketing, payment, or accounts.
+- Static site: branch and showtime data is authored locally and clearly fictional. Nine real releases from smcinema.com (captured 2026-10-04) sit alongside twelve fictional films in Now showing, at the user's request, with their studio posters hotlinked from SM Cinema's CDN and marked `source: "smcinema"` in data.js; their showtimes at Taracine cinemas are still generated and fictional. No live ticketing, payment, or accounts.
 - Booking flow runs showtime → seat map → seat hold; the hold is simulated (Promise + timer) and no purchase is completed. Seat availability is generated deterministically per showtime, with a simulated live feed of other customers and real cross-tab sync through BroadcastChannel.
 - Philippine context: peso pricing, local censor ratings (G, PG, R-13, R-16, R-18), Philippine city and mall names for branches.
 - Terminology: "Now showing", "Coming soon", "Cinemas" (branches), "Showtimes", "Experience" (screen formats).

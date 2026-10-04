@@ -452,3 +452,29 @@ button.link { background: none; border: 0; padding: 0; font: inherit; cursor: po
   .row__seats { gap: 4px; }
   .seat.mine::after { background-size: 11px; }
 }
+
+/* ---------- cinemas page ---------- */
+.search { flex: 1 1 320px; max-width: 420px; }
+.cinemas--page .cinema { grid-template-columns: minmax(0, 1fr) auto; }
+.cinema__today { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 0.875rem; color: var(--mid); border-top: 1px solid var(--line); padding-top: 10px; margin-top: 2px; }
+.cinema__today b { color: var(--ink); font-weight: 600; }
+.cinema .actions { grid-row: 1; grid-column: 2; display: flex; gap: 8px; }
+
+/* ---------- experience page ---------- */
+.xp { display: grid; gap: 16px; }
+.xp__item { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: 24px; border: 1px solid var(--line); border-radius: var(--r-lg); padding: 24px; align-items: start; }
+.xp__item .icon { width: 44px; height: 44px; stroke-width: 1.5; }
+.xp__head { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
+.xp__head h3 { font-size: 1.5rem; }
+.xp__price { font-weight: 600; font-size: 1.375rem; letter-spacing: -0.01em; }
+.xp__price small { color: var(--mid); font-weight: 400; font-size: 0.875rem; margin-left: 6px; }
+.xp__blurb { color: var(--mid); margin: 6px 0 12px; max-width: 56ch; }
+.xp__side { background: var(--panel); border-radius: var(--r); padding: 18px; display: grid; gap: 10px; }
+.xp__side h4 { font-size: 0.875rem; font-weight: 600; margin: 0; }
+.xp__side .chips .chip { background: var(--bg); }
+.xp__side .actions { margin-top: 4px; }
+@media (max-width: 820px) {
+  .xp__item { grid-template-columns: 1fr; gap: 16px; padding: 18px; }
+  .cinema .actions { grid-row: auto; grid-column: 1 / -1; }
+  .cinemas--page .cinema { grid-template-columns: 1fr; }
+}

@@ -2,7 +2,7 @@
 
 A portfolio design study: a cinema-chain website modeled on the structure and booking flow of [SM Cinema](https://www.smcinema.com/), rebuilt with an original visual identity ("Kiosk Clarity": the lobby self-service kiosk brought to the web — one task per course, oversized targets, a three-step rail, one orange accent).
 
-Every film, cinema, price and perk is fictional.
+The ten cinemas, prices and perks are fictional. The Now showing list mixes nine real releases currently listed on smcinema.com (titles, ratings, runtimes, cast and synopses from their listing; posters hotlinked from SM Cinema's media CDN and owned by the films' studios) with twelve fictional films; Taracine does not actually screen anything.
 
 ## Run it
 
@@ -18,7 +18,9 @@ Opening `index.html` directly from the filesystem also works in most browsers.
 ## Pages
 
 - `index.html` — Home: step rail, tonight's films as poster tiles with next showtimes, Now showing / Coming soon, screen formats, pick-your-cinema, club. Tap a tile, then Continue.
-- `movies.html` — Movies listing with Now showing / Coming soon and format / family filters.
+- `movies.html` — Movies listing with Now showing / Coming soon and format / family filters (`?format=grand|wrap|salon` preselects a format; `?cinema=<id>` sets the cinema).
+- `cinemas.html` — All ten cinemas with search and region filter, what's still showing today at each, and a one-tap "Choose" that sets your cinema site-wide.
+- `experience.html` — Each screen format in depth (built from the `Screen` subclasses), where to find it, and what's showing in it this week.
 - `film.html?id=<film-id>` — Film detail, Cinema & time (cinema pills, 7-day strip, format highlight, showtime pills with price tags), Seats (a live seat map: your selection, unavailable, wheelchair spaces, seats taken by other customers in real time, cross-tab sync via BroadcastChannel), and Tickets (seat list, live summary, timed hold). `&cinema=<id>&date=YYYY-MM-DD` preselect. Your chosen cinema is remembered in the browser.
 - `login.html` — Sign in form with real-time validation, Show password, Remember me, and a simulated async login check.
 

@@ -77,6 +77,7 @@
 
   // Poster = photo + title composited in HTML (like a one-sheet). Falls back to the SVG art if the photo is missing.
   function posterImg(f, lazy = true) {
+    if (f.poster) return `<img class="photo" src="${f.poster}" alt="" width="600" height="900" ${lazy ? 'loading="lazy"' : ""} referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='assets/posters/${f.id}.svg'">`;
     return `<img class="photo" src="assets/posters/photos/${f.id}.jpg" alt="" width="600" height="900" ${lazy ? 'loading="lazy"' : ""} onerror="this.onerror=null;this.src='assets/posters/${f.id}.svg'">
       <span class="poster-cap" aria-hidden="true"><b>${f.title}</b><small>A Taracine release · ${f.release.slice(0, 4)}</small></span>`;
   }
@@ -85,7 +86,7 @@
   const bar = $("#continue");
   function showBar(opts) {
     if (!bar) return;
-    $("#continue-art").src = opts.art || ""; $("#continue-title").textContent = opts.title; $("#continue-sub").textContent = opts.sub || "";
+    const art = $("#continue-art"); art.referrerPolicy = "no-referrer"; art.src = opts.art || ""; $("#continue-title").textContent = opts.title; $("#continue-sub").textContent = opts.sub || "";
     const btn = $("#continue-btn"); btn.innerHTML = `${opts.label}<svg class="icon"><use href="#i-arrow"/></svg>`; if (opts.href) btn.href = opts.href;
     bar.dataset.show = "true"; document.body.dataset.bar = "true";
   }
@@ -110,7 +111,7 @@
       $$(".tile[aria-pressed=true]").forEach(x => x.setAttribute("aria-pressed", "false"));
       t.setAttribute("aria-pressed", "true");
       const nx = f.status === "soon" ? null : nextToday(f);
-      showBar({ art: `assets/posters/photos/${f.id}.jpg`, title: f.title, sub: f.status === "soon" ? `Opens ${fmtRelease(f.release)} · details and reminders` : `${cinema().name} · ${nx.text}`, label: f.status === "soon" ? "See details" : "Pick a time", href: filmUrl(f) });
+      showBar({ art: f.poster || `assets/posters/photos/${f.id}.jpg`, title: f.title, sub: f.status === "soon" ? `Opens ${fmtRelease(f.release)} · details and reminders` : `${cinema().name} · ${nx.text}`, label: f.status === "soon" ? "See details" : "Pick a time", href: filmUrl(f) });
     });
     root.addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && e.target.classList.contains("tile")) { e.preventDefault(); e.target.click(); } });
   }
@@ -158,7 +159,8 @@
 
   // ================= MOVIES =================
   if (page === "movies") {
-    const filters = { format: "", rating: "" };
+    const filters = { format: ["grand", "wrap", "salon"].includes(params.get("format")) ? params.get("format") : "", rating: "" };
+    $$("[data-filter=format]").forEach(x => x.setAttribute("aria-pressed", x.dataset.value === filters.format));
     function apply() {
       ["now", "soon"].forEach(status => {
         const list = D.films.filter(f => f.status === status && (!filters.format || f.formats.includes(filters.format)) && (!filters.rating || ["G", "PG"].includes(f.rating)));
@@ -182,17 +184,19 @@
   if (page === "film") {
     const film = D.films.find(f => f.id === params.get("id")) || D.films[0];
     document.title = `${film.title} — Taracine`;
-    $("#film-title").textContent = film.title; $("#film-tagline").textContent = film.tagline;
-    const poster = $("#film-poster"); poster.className = "photo"; poster.src = `assets/posters/photos/${film.id}.jpg`; poster.alt = `Poster for ${film.title}`;
+    $("#film-title").textContent = film.title; $("#film-tagline").textContent = film.tagline; $("#film-tagline").hidden = !film.tagline && film.source !== "smcinema";
+    const poster = $("#film-poster"); poster.className = "photo"; poster.alt = `Poster for ${film.title}`;
     poster.onerror = () => { poster.onerror = null; poster.src = `assets/posters/${film.id}.svg`; };
-    poster.insertAdjacentHTML("afterend", `<span class="poster-cap" aria-hidden="true"><b>${film.title}</b><small>A Taracine release · ${film.release.slice(0, 4)}</small></span>`);
+    if (film.poster) { poster.referrerPolicy = "no-referrer"; poster.src = film.poster; }
+    else { poster.src = `assets/posters/photos/${film.id}.jpg`; poster.insertAdjacentHTML("afterend", `<span class="poster-cap" aria-hidden="true"><b>${film.title}</b><small>A Taracine release · ${film.release.slice(0, 4)}</small></span>`); }
+    if (film.source === "smcinema") $("#film-tagline").innerHTML = `Now showing at SM Cinema · <a class="link" href="${film.sourceUrl}" rel="noopener" target="_blank">listing</a>`;
     $("#film-chips").innerHTML = `<span class="${ratingClass(film.rating)}" title="${D.ratingDescriptions[film.rating]}">${film.rating}</span>` + film.formats.map(x => `<span class="chip chip--sm">${D.formats[x].name}</span>`).join("");
     $("#film-specs").innerHTML = `
       <div><dt>Runtime</dt><dd>${runtime(film.runtime)}</dd></div>
       <div><dt>${film.status === "soon" ? "Opens" : "Released"}</dt><dd>${fmtRelease(film.release)}</dd></div>
       <div><dt>Genre</dt><dd>${film.genres.join(" · ")}</dd></div>
       <div><dt>Rating</dt><dd>${D.ratingDescriptions[film.rating]}</dd></div>
-      <div><dt>Director</dt><dd>${film.director}</dd></div>
+      ${film.director ? `<div><dt>Director</dt><dd>${film.director}</dd></div>` : ""}
       <div><dt>Cast</dt><dd>${film.cast.join(", ")}</dd></div>`;
     $("#film-synopsis").innerHTML = film.synopsis.map(p => `<p>${p}</p>`).join("");
     $("#trailer-btn").addEventListener("click", () => { $("#trailer-state").hidden = false; });
@@ -425,7 +429,7 @@
       const s2 = $("#step-2"), s3 = $("#step-3");
       if (!chosen) {
         ticketsSec.hidden = true; seatsSec.hidden = true; s2.setAttribute("aria-current", "step"); s2.classList.remove("done"); s2.querySelector("b").textContent = "2"; s3.removeAttribute("aria-current");
-        if (film.status === "now") showBar({ art: `assets/posters/photos/${film.id}.jpg`, title: film.title, sub: `${cinema().name} · ${fmtDay(dateIso)} · pick a time`, label: "Pick a time" });
+        if (film.status === "now") showBar({ art: film.poster || `assets/posters/photos/${film.id}.jpg`, title: film.title, sub: `${cinema().name} · ${fmtDay(dateIso)} · pick a time`, label: "Pick a time" });
         else hideBar();
         const btn = $("#continue-btn"); btn.disabled = false; btn.onclick = () => $("#sessions").scrollIntoView({ behavior: "smooth", block: "start" });
         return;
@@ -441,7 +445,7 @@
       qtyNote.textContent = `${chosen.seats} seats available in ${F.name}. Up to 6 per booking.`;
       summary.innerHTML = `<div class="row"><span>Film</span><b>${film.title}</b></div><div class="row"><span>Cinema</span><b>${cinema().name}</b></div><div class="row"><span>When</span><b>${fmtDay(dateIso)} · ${D.fmtTime(chosen.h, chosen.m)}</b></div><div class="row"><span>Format</span><b>${F.name}</b></div><div class="row"><span>Seats</span><b>${seats.join(", ")}</b></div><div class="row"><span>Price</span><b>${qty} × ${D.peso(F.price)}</b></div><div class="row total"><span>Total</span><b>${D.peso(F.priceFor(qty))}</b></div>`;
       const label = holdState === "holding" ? "Holding…" : holdState === "held" ? `Held · ${mmss(holdSecondsLeft)}` : holdState === "expired" ? "Hold again" : "Buy tickets";
-      showBar({ art: `assets/posters/photos/${film.id}.jpg`, title: `${film.title} · ${D.fmtTime(chosen.h, chosen.m)}`, sub: `${cinema().name} · ${fmtDay(dateIso)} · ${F.name} · ${qty} seat${qty > 1 ? "s" : ""} · ${D.peso(F.priceFor(qty))}`, label });
+      showBar({ art: film.poster || `assets/posters/photos/${film.id}.jpg`, title: `${film.title} · ${D.fmtTime(chosen.h, chosen.m)}`, sub: `${cinema().name} · ${fmtDay(dateIso)} · ${F.name} · ${qty} seat${qty > 1 ? "s" : ""} · ${D.peso(F.priceFor(qty))}`, label });
       const btn = $("#continue-btn");
       btn.disabled = locked || qty === 0;
       if (qty === 0 && !locked) btn.innerHTML = `Pick a seat first<svg class="icon"><use href="#i-arrow"/></svg>`;
@@ -487,6 +491,70 @@
     const also = D.films.filter(f => f.status === "now" && f.id !== film.id).slice(0, 6);
     $("#grid-also").innerHTML = also.map(tile).join("");
     $("#grid-also").addEventListener("click", e => { const t = e.target.closest(".tile"); if (t && !e.target.closest(".tile__open")) location.href = filmUrl(D.films.find(x => x.id === t.dataset.id)); });
+  }
+
+  // ================= CINEMAS =================
+  if (page === "cinemas") {
+    const list = $("#cinema-list"), search = $("#cinema-search"), regionEl = $("#region-filter");
+    let q = "", region = "";
+    function todayLine(c) {
+      const todayIso = D.isoDate(today), now = minutesNow();
+      const showing = D.films.filter(f => f.status === "now").map(f => {
+        const all = D.sessions(f.id, c.id, todayIso).flatMap(g => g.times.map(t => ({ ...t, mins: t.h * 60 + t.m }))).filter(t => t.mins >= now && !isSoldOut(t)).sort((a, b) => a.mins - b.mins);
+        return all.length ? { f, next: all[0] } : null;
+      }).filter(Boolean).sort((a, b) => a.next.mins - b.next.mins);
+      if (!showing.length) return `<span>No more shows today</span>`;
+      return `<span><b>${showing.length}</b> film${showing.length > 1 ? "s" : ""} still showing today</span><span>Next: <b>${showing[0].f.title}</b> at ${D.fmtTime(showing[0].next.h, showing[0].next.m)}</span>`;
+    }
+    function paint() {
+      const rows = D.cinemas.filter(c => (!region || c.region === region) && (!q || (c.name + " " + c.city + " " + c.address).toLowerCase().includes(q)));
+      list.innerHTML = rows.length ? rows.map(c => `<div class="cinema" aria-pressed="${c.id === myCinema}" data-id="${c.id}">
+        <div><h3>${c.name}</h3><p>${c.address}, ${c.city} · ${c.screens} screens · ${c.region}</p></div>
+        <div class="actions"><button class="btn btn--ghost btn--sm pick" type="button">${c.id === myCinema ? "Your cinema" : "Choose"}</button><a class="btn btn--sm ${c.id === myCinema ? "" : "btn--ghost"}" href="movies.html?cinema=${c.id}">Showtimes</a></div>
+        <div class="chips">${c.formats.map(x => `<span class="chip chip--sm">${D.formats[x].name}</span>`).join("")}</div>
+        <p class="cinema__today">${todayLine(c)}</p>
+      </div>`).join("") : `<div class="empty"><h3>No cinema matches</h3><p>Try a city name like Cebu or Quezon City, or clear the region filter.</p></div>`;
+    }
+    // Lesson: Event Delegation — one listener on the list; the Showtimes link is left to navigate on its own
+    list.addEventListener("click", e => {
+      if (e.target.closest("a")) return;
+      const c = e.target.closest(".cinema"); if (!c) return;
+      setMyCinema(c.dataset.id); paint(); paintToday();
+    });
+    search.addEventListener("input", () => { q = search.value.trim().toLowerCase(); paint(); });
+    regionEl.addEventListener("click", e => { const b = e.target.closest(".chip"); if (!b) return; region = b.dataset.region; $$(".chip", regionEl).forEach(x => x.setAttribute("aria-pressed", x === b)); paint(); });
+    function paintToday() {
+      const todayIso = D.isoDate(today), now = minutesNow();
+      const here = D.films.filter(f => f.status === "now" && D.sessions(f.id, myCinema, todayIso).some(g => g.times.some(t => t.h * 60 + t.m >= now)));
+      $("#grid-today").innerHTML = (here.length ? here : D.films.filter(f => f.status === "now")).slice(0, 8).map(tile).join("");
+      $("#today-sub").textContent = here.length ? "Next shows at your cinema. Tap a film to pick a time." : "No more shows today at your cinema. Here is what's on this week.";
+    }
+    paint(); paintToday(); wireTiles($("#grid-today"));
+  }
+
+  // ================= EXPERIENCE =================
+  if (page === "experience") {
+    const icons = { standard: "i-screen", grand: "i-grand", wrap: "i-wrap", salon: "i-salon" };
+    /* Lesson: Polymorphism — the page is built by calling the same perks() on every Screen subclass with forEach. */
+    const xp = $("#xp");
+    D.screens.forEach(screen => {
+      const where = D.cinemas.filter(c => c.formats.includes(screen.id));
+      const films = D.films.filter(f => f.status === "now" && f.formats.includes(screen.id));
+      xp.insertAdjacentHTML("beforeend", `<article class="xp__item" id="${screen.id}">
+        <div>
+          <div class="xp__head"><svg class="icon"><use href="#${icons[screen.id]}"/></svg><div><h3>${screen.name}</h3><p class="xp__price">${D.peso(screen.price)}<small>per seat</small></p></div></div>
+          <p class="xp__blurb">${screen.blurb}</p>
+          <ul class="perks">${screen.perks().map(p => `<li>${p}</li>`).join("")}</ul>
+        </div>
+        <aside class="xp__side">
+          <h4>Where to find it</h4>
+          <div class="chips">${where.map(c => `<a class="chip" href="movies.html?cinema=${c.id}&format=${screen.id}">${c.name.replace("Taracine ", "")}</a>`).join("")}</div>
+          <h4>Showing in ${screen.name} this week</h4>
+          <p class="muted" style="font-size:.9375rem">${films.length ? films.slice(0, 4).map(f => f.title).join(" · ") + (films.length > 4 ? ` and ${films.length - 4} more` : "") : "Nothing scheduled this week."}</p>
+          <div class="actions"><a class="btn btn--sm" href="movies.html?format=${screen.id}">Browse ${screen.name} films<svg class="icon"><use href="#i-arrow"/></svg></a></div>
+        </aside>
+      </article>`);
+    });
   }
 
   // ================= LOGIN =================

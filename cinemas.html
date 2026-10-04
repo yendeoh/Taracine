@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="en">
 <head>
-<title>Taracine — What are we watching tonight?</title>
+<title>Cinemas — Taracine</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Taracine cinemas: tonight's films, next showtimes, and ten cinemas across the Philippines. A design study.">
+<meta name="description" content="Ten Taracine cinemas across the Philippines. Choose yours and see what's showing today.">
 <meta name="theme-color" content="#FFFFFF">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,7 +13,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230F1115'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23FF5A1F'/%3E%3C/svg%3E">
 
 </head>
-<body data-page="home">
+<body data-page="cinemas">
 <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
   <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></symbol>
   <symbol id="i-film" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M8 4v16M16 4v16M3 9h5M3 15h5M16 9h5M16 15h5"/></symbol>
@@ -61,76 +61,36 @@
 
 <main id="main">
 <div class="wrap">
-  <nav class="steps" aria-label="Booking steps">
-    <span class="step" aria-current="step"><b>1</b><span>Movie</span></span><span class="sep" aria-hidden="true"></span>
-    <span class="step"><b>2</b><span>Cinema &amp; time</span></span><span class="sep" aria-hidden="true"></span>
-    <span class="step"><b>3</b><span>Tickets</span></span>
-  </nav>
   <section class="hero">
-    <h1>What are we watching tonight?</h1>
-    <p class="sub"><span id="hero-cinema">Taracine Cubao</span> <span aria-hidden="true">·</span> <span id="hero-date">Today</span> <span aria-hidden="true">·</span> <a href="#cinemas">Change cinema</a></p>
+    <h1>Cinemas</h1>
+    <p class="sub">Ten Taracine cinemas across the Philippines. Choose one and the whole site shows its showtimes.</p>
   </section>
 </div>
-
-<section class="course" id="movies" aria-labelledby="now-title">
+<section class="course" aria-labelledby="cin-title">
   <div class="wrap">
+    <h2 id="cin-title" class="visually-hidden">Find a cinema</h2>
     <div class="course__head">
-      <h2 id="now-title">Now showing</h2>
-      <div class="seg" role="tablist" aria-label="Film lists">
-        <button role="tab" id="tab-now" aria-selected="true" aria-controls="grid-now" data-status="now">Now showing <span class="count" id="count-now"></span></button>
-        <button role="tab" id="tab-soon" aria-selected="false" aria-controls="grid-soon" data-status="soon">Coming soon <span class="count" id="count-soon"></span></button>
+      <div class="fgroup search"><label for="cinema-search" class="visually-hidden">Search cinemas</label><input class="input" type="search" id="cinema-search" placeholder="Search by cinema or city" autocomplete="off"></div>
+      <div class="chips" id="region-filter" role="group" aria-label="Region">
+        <button class="chip" type="button" data-region="" aria-pressed="true">All regions</button>
+        <button class="chip" type="button" data-region="Metro Manila" aria-pressed="false">Metro Manila</button>
+        <button class="chip" type="button" data-region="Luzon" aria-pressed="false">Luzon</button>
+        <button class="chip" type="button" data-region="Visayas" aria-pressed="false">Visayas</button>
+        <button class="chip" type="button" data-region="Mindanao" aria-pressed="false">Mindanao</button>
       </div>
     </div>
-    <div class="tiles" id="grid-now" role="tabpanel" aria-labelledby="tab-now"></div>
-    <div class="tiles" id="grid-soon" role="tabpanel" aria-labelledby="tab-soon" hidden></div>
+    <div class="cinemas cinemas--page" id="cinema-list"></div>
   </div>
 </section>
-
-<section class="course course--panel" id="experience" aria-labelledby="exp-title">
+<section class="course course--panel" aria-labelledby="today-title">
   <div class="wrap">
     <div class="course__head">
-      <div class="lead"><h2 id="exp-title">Four ways to watch</h2><p>Every Taracine has Standard screens. Bigger rooms are listed under each cinema.</p></div>
-      <a class="btn btn--ghost btn--sm" href="experience.html">About each format<svg class="icon"><use href="#i-arrow"/></svg></a>
+      <div class="lead"><h2 id="today-title">Today at <span id="hero-cinema">Taracine Cubao</span></h2><p id="today-sub">Next shows at your cinema. Tap a film to pick a time.</p></div>
+      <a class="btn btn--ghost btn--sm" href="movies.html">All movies<svg class="icon"><use href="#i-arrow"/></svg></a>
     </div>
-    <div class="formats" id="formats"></div>
+    <div class="rail" id="grid-today"></div>
   </div>
 </section>
-
-<section class="course" id="cinemas" aria-labelledby="cin-title">
-  <div class="wrap">
-    <div class="course__head">
-      <div class="lead"><h2 id="cin-title">Pick your cinema</h2><p>We'll show its showtimes everywhere on the site. Change it any time.</p></div>
-      <a class="btn btn--ghost btn--sm" href="cinemas.html">All cinemas<svg class="icon"><use href="#i-arrow"/></svg></a>
-    </div>
-    <div class="cinemas" id="cinema-list"></div>
-  </div>
-</section>
-
-<section class="course" id="club" aria-labelledby="club-title">
-  <div class="wrap">
-    <div class="course__head"><div class="lead"><h2 id="club-title">Taracine Club</h2><p>Members book first and earn points on every seat.</p></div></div>
-    <div class="club">
-      <div class="club__card">
-        <h3>Premium member</h3>
-        <p class="price">₱1,200<small>per year</small></p>
-        <ul>
-          <li><svg class="icon"><use href="#i-check"/></svg>One free popcorn-and-drink upgrade every visit</li>
-          <li><svg class="icon"><use href="#i-check"/></svg>One free ticket in your birth month</li>
-          <li><svg class="icon"><use href="#i-check"/></svg>Double Cinema Points on every ticket</li>
-          <li><svg class="icon"><use href="#i-check"/></svg>Advance booking for Grand Screen and Salon openings</li>
-        </ul>
-        <a class="btn" href="#">Join the Club<svg class="icon"><use href="#i-arrow"/></svg></a>
-      </div>
-      <div class="club__points">
-        <h3>Cinema Points</h3>
-        <p class="big">1 point = ₱1</p>
-        <p>Earn points on every ticket and snack, and spend them at any Taracine counter nationwide. Members earn double.</p>
-        <a class="link" href="#">Check your points balance</a>
-      </div>
-    </div>
-  </div>
-</section>
-
 <div class="continue" id="continue" data-show="false" aria-live="polite">
   <div class="wrap continue__in">
     <div class="continue__art"><img id="continue-art" src="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 2 3%27%3E%3Crect width=%272%27 height=%273%27 fill=%27%23F2F3F5%27/%3E%3C/svg%3E" alt="" width="40" height="60"></div>
