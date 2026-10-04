@@ -528,3 +528,10 @@ The orange ration is unchanged: the only orange on the sign-in page is the Login
 - **Cinemas page**: the `.cinema` card grows a `.cinema__today` line (hairline above, `--mid` text with ink bolds) and an actions pair (Choose + Showtimes). A `.search` text input and region chips lead the course; the empty state reuses `.empty`.
 - **Experience page**: one `.xp__item` per screen format, a two-column hairline card (icon + name + price, blurb, perks | a `--panel` aside with "Where to find it" chips and the week's titles). Stacks to one column under 820px.
 - **Real posters**: when a film carries a studio one-sheet, the tile shows it uncaptioned; the photo + `.poster-cap` treatment is only for the fictional films.
+
+## Sign-in prompt, payment and receipts (added)
+
+- **Sign-in prompt** `.authbox`: an `--accent-soft` panel (no border) with a 1.125rem heading, `--accent-ink` body copy and three actions: primary Sign in, ghost Create account, ghost Continue as guest. It appears inline in the Tickets step when a visitor without an account presses Buy tickets; no modal.
+- **Payment methods** `.method`: 64px radio rows with a 16px radius hairline border; the checked row turns `--ink` border on `--panel`, and the demo method turns `--accent` border on `--accent-soft`. States print inline under the rows.
+- **Receipt** `.receipt`: a 24px card split by a dashed hairline into poster + title, detail rows + a 96px demo entry code (12×12 ink cells with three finder squares), and a `--panel` footer carrying the monospace reference and Cancel. The receipt just paid gets an `--ok` border.
+- **Step rail** gains step 4, Payment; steps 1–3 show as done (green) while paying.

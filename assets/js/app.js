@@ -29,16 +29,16 @@
   paintCinema();
   const hd = $("#hero-date"); if (hd) hd.textContent = `${DAYS[today.getDay()]} ${today.getDate()} ${MONTHS[today.getMonth()]}`;
 
-  // ----- remembered sign-in (from the login page's Remember Me) -----
-  let user = null;
-  try { user = JSON.parse(localStorage.getItem("taracine.user") || "null"); } catch (e) {}
+  // ----- signed-in user (DummyJSON account kept in this browser; see data.js store) -----
+  let user = D.store.user();
   const signIn = $("#sign-in");
   if (signIn && user) signIn.innerHTML = `<svg class="icon"><use href="#i-user"/></svg>Hi, ${user.name}`;
+  const tabAcc = $("#tab-account"); if (tabAcc && user) tabAcc.innerHTML = `<svg class="icon"><use href="#i-user"/></svg>${user.name}`;
 
   // ----- shell -----
   $$("[data-nav]").forEach(a => { if (a.dataset.nav === page) a.setAttribute("aria-current", "page"); });
   function inlineNote(el, text) { const old = el.innerHTML; el.textContent = text; setTimeout(() => el.innerHTML = old, 2200); }
-  const tabTix = $("#tab-tickets"); if (tabTix) tabTix.addEventListener("click", e => { e.preventDefault(); inlineNote(tabTix, "No tickets yet"); });
+  const tabTix = $("#tab-tickets"); if (tabTix) { const n = D.store.bookings().length; if (n) tabTix.innerHTML = `<svg class="icon"><use href="#i-ticket"/></svg>Tickets · ${n}`; }
 
   // ----- helpers -----
   function dateList(n = 7) { return Array.from({ length: n }, (_, i) => { const d = new Date(today); d.setDate(d.getDate() + i); return d; }); }
@@ -206,6 +206,10 @@
     const dates = dateList();
     let dateIso = dates.map(D.isoDate).includes(params.get("date")) ? params.get("date") : D.isoDate(dates[0]);
     let chosen = null, focusFormat = "";
+    // a booking interrupted by sign-in comes back here with ?restore=1 (saved in sessionStorage by the auth prompt)
+    const pending = params.get("restore") && D.store.pending() && D.store.pending().filmId === film.id ? D.store.pending() : null;
+    if (pending) { dateIso = pending.date; if (D.cinemas.some(c => c.id === pending.cinemaId)) setMyCinema(pending.cinemaId); }
+    let guest = false, paying = false;
     /* Lesson: Arrays push() and pop(). `seats` holds the seat labels for this booking. The + button pushes the
        next seat onto the end; the − button pops the last one off. The summary prints the array. */
     let seats = [];
@@ -428,7 +432,7 @@
     function paintTickets() {
       const s2 = $("#step-2"), s3 = $("#step-3");
       if (!chosen) {
-        ticketsSec.hidden = true; seatsSec.hidden = true; s2.setAttribute("aria-current", "step"); s2.classList.remove("done"); s2.querySelector("b").textContent = "2"; s3.removeAttribute("aria-current");
+        ticketsSec.hidden = true; seatsSec.hidden = true; paySec.hidden = true; s4.removeAttribute("aria-current"); authbox.hidden = true; s2.setAttribute("aria-current", "step"); s2.classList.remove("done"); s2.querySelector("b").textContent = "2"; s3.removeAttribute("aria-current");
         if (film.status === "now") showBar({ art: film.poster || `assets/posters/photos/${film.id}.jpg`, title: film.title, sub: `${cinema().name} · ${fmtDay(dateIso)} · pick a time`, label: "Pick a time" });
         else hideBar();
         const btn = $("#continue-btn"); btn.disabled = false; btn.onclick = () => $("#sessions").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -444,6 +448,7 @@
       seatsOut.textContent = seats.join(", ");
       qtyNote.textContent = `${chosen.seats} seats available in ${F.name}. Up to 6 per booking.`;
       summary.innerHTML = `<div class="row"><span>Film</span><b>${film.title}</b></div><div class="row"><span>Cinema</span><b>${cinema().name}</b></div><div class="row"><span>When</span><b>${fmtDay(dateIso)} · ${D.fmtTime(chosen.h, chosen.m)}</b></div><div class="row"><span>Format</span><b>${F.name}</b></div><div class="row"><span>Seats</span><b>${seats.join(", ")}</b></div><div class="row"><span>Price</span><b>${qty} × ${D.peso(F.price)}</b></div><div class="row total"><span>Total</span><b>${D.peso(F.priceFor(qty))}</b></div>`;
+      paintPayment();
       const label = holdState === "holding" ? "Holding…" : holdState === "held" ? `Held · ${mmss(holdSecondsLeft)}` : holdState === "expired" ? "Hold again" : "Buy tickets";
       showBar({ art: film.poster || `assets/posters/photos/${film.id}.jpg`, title: `${film.title} · ${D.fmtTime(chosen.h, chosen.m)}`, sub: `${cinema().name} · ${fmtDay(dateIso)} · ${F.name} · ${qty} seat${qty > 1 ? "s" : ""} · ${D.peso(F.priceFor(qty))}`, label });
       const btn = $("#continue-btn");
@@ -451,6 +456,7 @@
       if (qty === 0 && !locked) btn.innerHTML = `Pick a seat first<svg class="icon"><use href="#i-arrow"/></svg>`;
       btn.onclick = () => {
         if (ticketsSec.getBoundingClientRect().top > innerHeight * 0.6) ticketsSec.scrollIntoView({ behavior: "smooth", block: "start" });
+        if (!user && !guest) { askToSignIn(); return; }
         hold();
       };
     }
@@ -459,6 +465,51 @@
 
     function mmss(s) { return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; }
     function stopHold() { if (holdTimer) { clearInterval(holdTimer); holdTimer = null; } holdEl.hidden = true; holdEl.className = "state"; }
+
+    // ----- booking without an account: suggest sign-in / sign-up, keep the booking for the round trip -----
+    const authbox = $("#authbox");
+    function pendingPayload() { return { filmId: film.id, cinemaId: myCinema, date: dateIso, format: chosen.format, h: chosen.h, m: chosen.m, seats: [...seats] }; }
+    function askToSignIn() {
+      D.store.setPending(pendingPayload());
+      const back = `film.html?${new URLSearchParams({ id: film.id, cinema: myCinema, date: dateIso, restore: 1 })}`;
+      $("#auth-login").href = `login.html?next=${encodeURIComponent(back)}`;
+      $("#auth-signup").href = `login.html?mode=signup&next=${encodeURIComponent(back)}`;
+      authbox.hidden = false;
+      authbox.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+    $("#auth-guest").addEventListener("click", () => { guest = true; authbox.hidden = true; D.store.setPending(null); hold(); });
+
+    // ----- payment (step 4) -----
+    const paySec = $("#payment"), payBtn = $("#pay-btn"), payState = $("#pay-state"), paySummary = $("#pay-summary"), guestFields = $("#guest-fields"), s4 = $("#step-4");
+    function paintPayment() {
+      if (holdState !== "held") { paySec.hidden = true; s4.removeAttribute("aria-current"); return; }
+      const F = D.formats[chosen.format];
+      paySec.hidden = false; s4.setAttribute("aria-current", "step"); $("#step-3").removeAttribute("aria-current"); $("#step-3").classList.add("done"); $("#step-3").querySelector("b").innerHTML = `<svg class="icon"><use href="#i-check"/></svg>`;
+      guestFields.hidden = !!user;
+      paySummary.innerHTML = `<div class="row"><span>Film</span><b>${film.title}</b></div><div class="row"><span>Cinema</span><b>${cinema().name}</b></div><div class="row"><span>When</span><b>${fmtDay(dateIso)} · ${D.fmtTime(chosen.h, chosen.m)}</b></div><div class="row"><span>Seats</span><b>${seats.join(", ")} · ${F.name}</b></div><div class="row"><span>Booked as</span><b>${user ? `${user.name} ${user.lastName || ""}`.trim() : "Guest"}</b></div><div class="row total"><span>Total</span><b>${D.peso(F.priceFor(seats.length))}</b></div>`;
+    }
+    /* Lesson: Async/Await + try...catch again. payBooking() rejects for every method except "bypass", which is the
+       demonstration path to the receipt. The booking is stored in this browser and shown on tickets.html. */
+    payBtn.addEventListener("click", async () => {
+      if (paying) return;
+      const method = (document.querySelector('input[name="method"]:checked') || {}).value || "bypass";
+      const nameInput = $("#guest-name"), nameMsg = $("#guest-name-msg");
+      if (!user && !nameInput.value.trim()) { nameMsg.textContent = "Add a name for the ticket."; nameMsg.className = "msg error"; nameInput.classList.add("invalid"); nameInput.focus(); return; }
+      nameMsg.textContent = ""; nameInput.classList.remove("invalid");
+      paying = true; payBtn.disabled = true;
+      payState.hidden = false; payState.className = "state state--info"; payState.innerHTML = `<svg class="icon"><use href="#i-clock"/></svg><span>Processing ${method === "bypass" ? "demo payment" : method}…</span>`;
+      const F = D.formats[chosen.format];
+      const booking = { filmId: film.id, filmTitle: film.title, poster: film.poster || `assets/posters/photos/${film.id}.jpg`, cinemaId: myCinema, cinemaName: cinema().name, date: dateIso, time: D.fmtTime(chosen.h, chosen.m), format: F.name, seats: [...seats], total: F.priceFor(seats.length), name: user ? `${user.name} ${user.lastName || ""}`.trim() : nameInput.value.trim(), email: user ? user.email : "", userId: user ? user.id : null };
+      try {
+        const paid = await D.payBooking(booking, method);
+        D.store.addBooking(paid); stopHold(); stopFeed(); D.store.setPending(null);
+        payState.className = "state"; payState.innerHTML = `<svg class="icon"><use href="#i-check"/></svg><span>Paid. Reference ${paid.ref}. Opening your receipt…</span>`;
+        setTimeout(() => { location.href = `tickets.html?ref=${paid.ref}`; }, 900);
+      } catch (error) {
+        payState.className = "state state--warn"; payState.innerHTML = `<svg class="icon"><use href="#i-info"/></svg><span>${error}</span>`;
+        paying = false; payBtn.disabled = false;
+      }
+    });
 
     /* Lesson: Async/Await with try...catch. holdSeats() in data.js returns a Promise that resolves after a short
        delay (a simulated server). The page prints "Holding…" first, awaits the result, then prints success or the
@@ -469,6 +520,7 @@
       try {
         const result = await D.holdSeats(seats);
         holdState = "held"; holdSecondsLeft = result.minutes * 60; broadcast();
+        setTimeout(() => { paintPayment(); paySec.scrollIntoView({ behavior: "smooth", block: "start" }); }, 60);
         holdEl.className = "state"; holdEl.innerHTML = `<svg class="icon"><use href="#i-check"/></svg><span>Seats ${result.seats.join(", ")} held for ${result.minutes} minutes. In the real flow, payment opens here; this study stops at the hold.</span>`;
         holdTimer = setInterval(() => {
           holdSecondsLeft--;
@@ -487,6 +539,17 @@
     }
 
     paintPills(); paintFormats(); paintSessions();
+    if (pending) {
+      const btn = $$(".time", sessionsEl).find(x => x.dataset.format === pending.format && +x.dataset.h === pending.h && +x.dataset.m === pending.m && !x.disabled);
+      if (btn) {
+        btn.click();
+        const wanted = pending.seats.filter(id => { const st = seatMap && seatMap.seats.get(id); return st && st.state === "free"; });
+        if (wanted.length) { seats = wanted; paintSeats(); paintTickets(); broadcast(); }
+        note(user ? `Welcome back, ${user.name}. Your seats are still here: ${seats.join(", ")}.` : `Your seats are still here: ${seats.join(", ")}.`, "info");
+        D.store.setPending(null);
+        setTimeout(() => $("#tickets").scrollIntoView({ behavior: "smooth", block: "start" }), 80);
+      }
+    }
 
     const also = D.films.filter(f => f.status === "now" && f.id !== film.id).slice(0, 6);
     $("#grid-also").innerHTML = also.map(tile).join("");
@@ -561,8 +624,8 @@
   /* Lesson: JavaScript and Forms — Login Form (Week 9). Same structure as the lesson: select the form and fields,
      validateEmail() and validatePassword() return true/false, showError()/showValid() print feedback next to the
      field, input + blur give real-time feedback, the Show Password checkbox flips the input type, submit uses
-     preventDefault() and runs every validator before showing success. The login check itself is a Promise
-     (checkLogin in data.js) awaited with try...catch, as in the Asynchronous JavaScript lesson. */
+     preventDefault() and runs every validator before continuing. The account check is a real request to
+     dummyjson.com (fetch + async/await + try...catch, from the Asynchronous JavaScript lesson). */
   if (page === "login") {
     const form = document.getElementById("loginForm");
     const email = document.getElementById("email");
@@ -574,6 +637,26 @@
     const output = document.getElementById("output");
     const submitBtn = document.getElementById("loginBtn");
     const signedIn = document.getElementById("signed-in");
+    const firstName = document.getElementById("firstName"), lastName = document.getElementById("lastName");
+    const nameFields = document.getElementById("name-fields");
+    let mode = params.get("mode") === "signup" ? "signup" : "login";
+    const next = params.get("next") && params.get("next").startsWith("film.html") ? params.get("next") : "index.html";
+
+    function paintMode() {
+      const signup = mode === "signup";
+      nameFields.hidden = !signup;
+      $("#login-h1").textContent = signup ? "Create account" : "Sign in";
+      $("#login-sub").textContent = signup ? "Your tickets and Cinema Points live in one place." : (params.get("next") ? "Sign in to finish your booking. Your seats are kept while you do." : "Members book first and earn Cinema Points on every seat.");
+      $("#email-label").textContent = signup ? "Email Address" : "Email or username";
+      email.placeholder = signup ? "Enter email" : "Enter email or username";
+      email.autocomplete = signup ? "email" : "username";
+      password.autocomplete = signup ? "new-password" : "current-password";
+      submitBtn.innerHTML = `${signup ? "Create account" : "Login"}<svg class="icon"><use href="#i-arrow"/></svg>`;
+      $("#mode-toggle").textContent = signup ? "Sign in instead" : "Create an account";
+      $("#mode-toggle").previousSibling.textContent = signup ? "Already a member? " : "New here? ";
+      output.hidden = true;
+    }
+    $("#mode-toggle").addEventListener("click", () => { mode = mode === "signup" ? "login" : "signup"; paintMode(); });
 
     function showError(input, messageElement, message) {
       messageElement.textContent = message;
@@ -593,8 +676,9 @@
     }
     function validateEmail() {
       const emailValue = email.value.trim();
-      if (emailValue === "") { showError(email, emailError, "Email is required."); return false; }
-      if (!emailValue.includes("@")) { showError(email, emailError, "Email must contain @."); return false; }
+      if (emailValue === "") { showError(email, emailError, mode === "signup" ? "Email is required." : "Email or username is required."); return false; }
+      if (mode === "signup" && !emailValue.includes("@")) { showError(email, emailError, "Email must contain @."); return false; }
+      if (mode === "login" && !emailValue.includes("@") && emailValue.length < 3) { showError(email, emailError, "Username must have at least 3 characters."); return false; }
       showValid(email, emailError);
       return true;
     }
@@ -605,11 +689,19 @@
       showValid(password, passwordError);
       return true;
     }
+    function validateName(input, messageElement, label) {
+      if (mode !== "signup") return true;
+      if (input.value.trim() === "") { showError(input, messageElement, `${label} is required.`); return false; }
+      showValid(input, messageElement);
+      return true;
+    }
     // Real-time feedback: while typing and after leaving the field
     email.addEventListener("input", validateEmail);
     email.addEventListener("blur", validateEmail);
     password.addEventListener("input", validatePassword);
     password.addEventListener("blur", validatePassword);
+    firstName.addEventListener("input", () => validateName(firstName, $("#firstNameError"), "First name"));
+    lastName.addEventListener("input", () => validateName(lastName, $("#lastNameError"), "Last name"));
     // Show Password: a checkbox changes the input type
     showPassword.addEventListener("change", function () {
       password.type = showPassword.checked ? "text" : "password";
@@ -619,26 +711,51 @@
       event.preventDefault();                       // keep the page from reloading
       const emailOK = validateEmail();
       const passwordOK = validatePassword();
-      if (!(emailOK && passwordOK)) { output.className = "state state--warn"; output.innerHTML = `<svg class="icon"><use href="#i-info"/></svg><span>Fix the fields above, then try again.</span>`; output.hidden = false; return; }
-      output.hidden = false; output.className = "state state--info"; output.innerHTML = `<svg class="icon"><use href="#i-clock"/></svg><span>Signing in…</span>`;
+      const firstOK = validateName(firstName, $("#firstNameError"), "First name");
+      const lastOK = validateName(lastName, $("#lastNameError"), "Last name");
+      if (!(emailOK && passwordOK && firstOK && lastOK)) { output.className = "state state--warn"; output.innerHTML = `<svg class="icon"><use href="#i-info"/></svg><span>Fix the fields above, then try again.</span>`; output.hidden = false; return; }
+      output.hidden = false; output.className = "state state--info"; output.innerHTML = `<svg class="icon"><use href="#i-clock"/></svg><span>${mode === "signup" ? "Creating your account…" : "Signing in…"}</span>`;
       submitBtn.disabled = true;
       try {
-        const result = await D.checkLogin(email.value.trim(), password.value);
-        let message = "Login successful! Welcome, " + result.email;
-        if (rememberMe.checked) { message += ". Remember Me is ON."; try { localStorage.setItem("taracine.user", JSON.stringify(result)); } catch (e) {} }
+        const result = mode === "signup"
+          ? await D.registerUser({ firstName: firstName.value.trim(), lastName: lastName.value.trim(), email: email.value.trim(), password: password.value })
+          : await D.loginUser(email.value.trim(), password.value);
+        D.store.setUser(result, rememberMe.checked);
+        let message = (mode === "signup" ? "Account created! Welcome, " : "Login successful! Welcome, ") + result.name + (result.email ? ` (${result.email})` : "");
+        if (rememberMe.checked) message += ". Remember Me is ON.";
         output.className = "state"; output.innerHTML = `<svg class="icon"><use href="#i-check"/></svg><span>${message}</span>`;
         if (signIn) signIn.innerHTML = `<svg class="icon"><use href="#i-user"/></svg>Hi, ${result.name}`;
-        setTimeout(() => { location.href = params.get("next") || "index.html"; }, 1600);
+        setTimeout(() => { location.href = next; }, 1400);
       } catch (error) {
-        output.className = "state state--warn"; output.innerHTML = `<svg class="icon"><use href="#i-info"/></svg><span>${error}</span>`;
+        output.className = "state state--warn"; output.innerHTML = `<svg class="icon"><use href="#i-info"/></svg><span>${error.message || error}</span>`;
         submitBtn.disabled = false;
       }
     });
 
+    paintMode();
     if (user) {
       signedIn.hidden = false;
-      signedIn.querySelector("b").textContent = user.email;
-      document.getElementById("sign-out").addEventListener("click", () => { try { localStorage.removeItem("taracine.user"); } catch (e) {} location.reload(); });
+      signedIn.querySelector("b").textContent = `${user.name} ${user.lastName || ""}`.trim() + (user.email ? ` · ${user.email}` : "");
+      document.getElementById("sign-out").addEventListener("click", () => { D.store.clearUser(); location.reload(); });
+      if (params.get("next")) { output.hidden = false; output.className = "state"; output.innerHTML = `<svg class="icon"><use href="#i-check"/></svg><span>You're signed in. <a class="link" href="${next}">Back to your booking</a></span>`; }
     }
+  }
+
+  // ================= TICKETS =================
+  if (page === "tickets") {
+    const list = $("#receipts"), highlight = params.get("ref");
+    function qr(ref) { const h = D.hash(ref); let cells = ""; for (let i = 0; i < 144; i++) { const r = Math.floor(i / 12), c = i % 12; const finder = (r < 3 && c < 3) || (r < 3 && c > 8) || (r > 8 && c < 3); const on = finder ? !((r === 1 || r === 10) && (c === 1 || c === 10)) : ((h >> (i % 31)) ^ ((i * 2654435761) >>> 7)) & 1; cells += `<i class="${on ? "" : "o"}"></i>`; } return `<div class="qr" aria-label="Demo entry code for ${ref}" role="img">${cells}</div>`; }
+    function paint() {
+      const all = D.store.bookings();
+      $("#tickets-sub").textContent = all.length ? `${all.length} booking${all.length > 1 ? "s" : ""} made in this browser. Show the code at the door.` : "No bookings yet. Pick a film and a time to get started.";
+      list.innerHTML = all.length ? all.map(b => `<article class="receipt ${b.ref === highlight ? "new" : ""}" data-ref="${b.ref}">
+        <div class="receipt__top"><img src="${b.poster}" alt="" referrerpolicy="no-referrer"><div><h3>${b.filmTitle}</h3><p>${b.cinemaName} · ${b.format}</p></div></div>
+        <div class="receipt__body"><div class="receipt__rows"><div><span>When</span><b>${fmtDay(b.date)} · ${b.time}</b></div><div><span>Seats</span><b>${b.seats.join(", ")}</b></div><div><span>Name</span><b>${b.name}</b></div><div><span>Paid</span><b>${D.peso(b.total)} · ${b.method}</b></div></div>${qr(b.ref)}</div>
+        <div class="receipt__foot"><span>Ref <b>${b.ref}</b></span><span>${b.ref === highlight ? "Just booked · " : ""}<button type="button" class="link" data-cancel="${b.ref}">Cancel booking</button></span></div>
+      </article>`).join("") : `<div class="empty"><h3>Nothing booked yet</h3><p>Your receipts will show up here after payment.</p><a class="btn btn--sm" href="movies.html">Browse movies</a></div>`;
+    }
+    // Lesson: Event Delegation — one listener on the list handles every Cancel button
+    list.addEventListener("click", e => { const b = e.target.closest("[data-cancel]"); if (!b) return; D.store.removeBooking(b.dataset.cancel); paint(); });
+    paint();
   }
 })();

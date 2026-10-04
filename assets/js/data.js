@@ -423,18 +423,33 @@ window.TARACINE = (function () {
     return out;
   }
 
-  /* Course reference (IPT): Asynchronous JavaScript — Promises, setTimeout, resolve/reject.
-     These two functions simulate a server the way the lesson's checkLogin() does. The page
-     awaits them inside async functions with try...catch (see app.js). */
-  function checkLogin(email, password) {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (password === "wrongpass") { reject("That password is not correct. Try again."); return; }
-        if (!email.includes("@")) { reject("Invalid email address."); return; }
-        resolve({ name: email.split("@")[0], email });
-      }, 1500);
-    });
+  /* Course reference (IPT): Asynchronous JavaScript — Promises, async/await, fetch, try...catch.
+     Accounts are real calls to dummyjson.com (a public demo API with ~200 sample users, e.g. emilys / emilyspass).
+     Nothing here is a real Taracine account: DummyJSON does not persist new users, so "Create account" returns the
+     record it would have created and the page signs you in with it for this browser only. */
+  const API = "https://dummyjson.com";
+  async function loginUser(usernameOrEmail, password) {
+    let username = usernameOrEmail.trim();
+    if (username.includes("@")) {
+      // DummyJSON logs in by username, so an email is looked up first
+      const r = await fetch(`${API}/users/filter?key=email&value=${encodeURIComponent(username)}&select=username`);
+      const data = await r.json();
+      if (!data.users || !data.users.length) throw new Error("No account uses that email. Try a DummyJSON user such as emilys / emilyspass, or create an account.");
+      username = data.users[0].username;
+    }
+    const r = await fetch(`${API}/auth/login`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username, password, expiresInMins: 60 }) });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.message === "Invalid credentials" ? "That username or password is not correct." : (data.message || "Could not sign in."));
+    return { id: data.id, username: data.username, name: data.firstName, lastName: data.lastName, email: data.email, image: data.image, token: data.accessToken, source: "dummyjson" };
   }
+  async function registerUser({ firstName, lastName, email, password }) {
+    const username = (firstName + lastName).toLowerCase().replace(/[^a-z0-9]/g, "") || email.split("@")[0];
+    const r = await fetch(`${API}/users/add`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ firstName, lastName, email, username, password }) });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.message || "Could not create the account.");
+    return { id: data.id, username: data.username, name: data.firstName, lastName: data.lastName, email: data.email, image: "", token: null, source: "dummyjson-new" };
+  }
+  // The seat hold and the payment are simulated with a Promise and a timer, as in the lesson's login example.
   function holdSeats(seats) {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
@@ -443,11 +458,32 @@ window.TARACINE = (function () {
       }, 1200);
     });
   }
+  function payBooking(booking, method) {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        if (method !== "bypass") reject(`${method} is not wired in this study. Choose "Bypass (demo)" to see the receipt.`);
+        else resolve({ ...booking, ref: makeRef(booking), paidAt: new Date().toISOString(), method: "Bypass (demo)" });
+      }, 1300);
+    });
+  }
+  function makeRef(b) { const h = hash(JSON.stringify([b.filmId, b.cinemaId, b.date, b.time, b.seats, Date.now()])); return "TRC-" + h.toString(36).toUpperCase().slice(0, 6).padStart(6, "0"); }
+
+  // bookings and the signed-in user live in this browser only
+  const store = {
+    user() { try { return JSON.parse(localStorage.getItem("taracine.user") || sessionStorage.getItem("taracine.user") || "null"); } catch (e) { return null; } },
+    setUser(u, remember) { try { (remember ? localStorage : sessionStorage).setItem("taracine.user", JSON.stringify(u)); (remember ? sessionStorage : localStorage).removeItem("taracine.user"); } catch (e) {} },
+    clearUser() { try { localStorage.removeItem("taracine.user"); sessionStorage.removeItem("taracine.user"); } catch (e) {} },
+    bookings() { try { return JSON.parse(localStorage.getItem("taracine.bookings") || "[]"); } catch (e) { return []; } },
+    addBooking(b) { const all = store.bookings(); all.unshift(b); try { localStorage.setItem("taracine.bookings", JSON.stringify(all)); } catch (e) {} },
+    removeBooking(ref) { try { localStorage.setItem("taracine.bookings", JSON.stringify(store.bookings().filter(b => b.ref !== ref))); } catch (e) {} },
+    pending() { try { return JSON.parse(sessionStorage.getItem("taracine.pending") || "null"); } catch (e) { return null; } },
+    setPending(p) { try { if (p) sessionStorage.setItem("taracine.pending", JSON.stringify(p)); else sessionStorage.removeItem("taracine.pending"); } catch (e) {} }
+  };
 
   function fmtTime(h, m) { const hh = ((h + 11) % 12) + 1; return `${hh}:${String(m).padStart(2, "0")} ${h < 12 ? "AM" : "PM"}`; }
   function pad(n) { return String(n).padStart(2, "0"); }
   function isoDate(d) { return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; }
   function peso(n) { return "₱" + n.toLocaleString("en-PH"); }
 
-  return { Screen, screens, films, formats, cinemas, ratingDescriptions, sessions, checkLogin, holdSeats, fmtTime, isoDate, peso, hash };
+  return { Screen, screens, films, formats, cinemas, ratingDescriptions, sessions, loginUser, registerUser, holdSeats, payBooking, makeRef, store, fmtTime, isoDate, peso, hash };
 })();

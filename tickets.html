@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="en">
 <head>
-<title>Sign in — Taracine</title>
+<title>Your tickets — Taracine</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Sign in to Taracine to hold seats and earn Cinema Points. A design study; login is simulated.">
+<meta name="description" content="Receipts for bookings made in this browser.">
 <meta name="theme-color" content="#FFFFFF">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,7 +13,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230F1115'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23FF5A1F'/%3E%3C/svg%3E">
 
 </head>
-<body data-page="login">
+<body data-page="tickets">
 <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
   <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></symbol>
   <symbol id="i-film" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M8 4v16M16 4v16M3 9h5M3 15h5M16 9h5M16 15h5"/></symbol>
@@ -63,49 +63,14 @@
 <main id="main">
 <div class="wrap">
   <section class="hero">
-    <h1 id="login-h1">Sign in</h1>
-    <p class="sub" id="login-sub">Members book first and earn Cinema Points on every seat.</p>
+    <h1>Your tickets</h1>
+    <p class="sub" id="tickets-sub">Bookings made in this browser. Show the code at the door.</p>
   </section>
 </div>
-<section class="course" aria-labelledby="login-title">
-  <div class="wrap login">
-    <h2 id="login-title" class="visually-hidden">Student Login</h2>
-    <div class="login__card">
-      <p class="state" id="signed-in" hidden><svg class="icon"><use href="#i-check"/></svg><span>Signed in as <b></b>. <button type="button" class="link" id="sign-out">Sign out</button></span></p>
-      <form id="loginForm" novalidate>
-        <div class="fgroup fgroup--names" id="name-fields" hidden>
-          <div><label for="firstName">First name</label><input class="input" type="text" id="firstName" placeholder="First name" autocomplete="given-name"><small class="msg" id="firstNameError"></small></div>
-          <div><label for="lastName">Last name</label><input class="input" type="text" id="lastName" placeholder="Last name" autocomplete="family-name"><small class="msg" id="lastNameError"></small></div>
-        </div>
-        <div class="fgroup">
-          <label for="email" id="email-label">Email or username</label>
-          <input class="input" type="text" id="email" name="email" placeholder="Enter email or username" autocomplete="username" aria-describedby="emailError">
-          <small class="msg" id="emailError" aria-live="polite"></small>
-        </div>
-        <div class="fgroup">
-          <label for="password">Password</label>
-          <input class="input" type="password" id="password" name="password" placeholder="Enter password" autocomplete="current-password" aria-describedby="passwordError">
-          <small class="msg" id="passwordError" aria-live="polite"></small>
-        </div>
-        <div class="checks">
-          <label class="check"><input type="checkbox" id="showPassword"><span>Show password</span></label>
-          <label class="check"><input type="checkbox" id="rememberMe"><span>Remember me</span></label>
-        </div>
-        <button class="btn" type="submit" id="loginBtn">Login<svg class="icon"><use href="#i-arrow"/></svg></button>
-        <p class="muted" style="font-size:.9375rem">New here? <button type="button" class="link" id="mode-toggle">Create an account</button></p>
-        <p class="state" id="output" hidden aria-live="polite"></p>
-      </form>
-      <p class="muted login__fine">Accounts come from <a class="link" href="https://dummyjson.com/users" rel="noopener" target="_blank">dummyjson.com</a>, a public demo API. Sign in with a sample user such as <code>emilys</code> / <code>emilyspass</code> (or the email <code>emily.johnson@x.dummyjson.com</code>). Created accounts are returned by the API but not stored there, so they live in this browser only.</p>
-    </div>
-    <aside class="login__side">
-      <h3>Why sign in?</h3>
-      <ul class="perks">
-        <li>Hold seats for ten minutes while you pay</li>
-        <li>Earn Cinema Points: 1 point = ₱1</li>
-        <li>Book Grand Screen and Salon openings first as a Club member</li>
-      </ul>
-      <a class="link" href="index.html#club">About the Taracine Club</a>
-    </aside>
+<section class="course" aria-labelledby="receipts-title">
+  <div class="wrap">
+    <h2 id="receipts-title" class="visually-hidden">Receipts</h2>
+    <div class="receipts" id="receipts"></div>
   </div>
 </section>
 

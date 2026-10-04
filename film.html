@@ -51,6 +51,7 @@
       <a href="cinemas.html" data-nav="cinemas">Cinemas</a>
       <a href="experience.html" data-nav="experience">Experience</a>
       <a href="index.html#club" data-nav="club">Club</a>
+      <a href="tickets.html" data-nav="tickets">Tickets</a>
     </nav>
     <div class="topbar__right">
       <a class="pill" href="cinemas.html" id="cinema-pill" title="Your cinema"><svg class="icon"><use href="#i-pin"/></svg><span class="long">Taracine </span><span id="cinema-pill-name">Cubao</span></a>
@@ -64,7 +65,8 @@
   <nav class="steps" aria-label="Booking steps">
     <a class="step done" href="movies.html"><b><svg class="icon"><use href="#i-check"/></svg></b><span>Movie</span></a><span class="sep" aria-hidden="true"></span>
     <a class="step" id="step-2" href="#when" aria-current="step"><b>2</b><span>Cinema &amp; time</span></a><span class="sep" aria-hidden="true"></span>
-    <a class="step" id="step-3" href="#seats"><b>3</b><span>Seats &amp; tickets</span></a>
+    <a class="step" id="step-3" href="#seats"><b>3</b><span>Seats &amp; tickets</span></a><span class="sep" aria-hidden="true"></span>
+    <a class="step" id="step-4" href="#payment"><b>4</b><span>Payment</span></a>
   </nav>
   <section class="film" aria-labelledby="film-title">
     <div class="film__art"><img id="film-poster" src="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 2 3%27%3E%3Crect width=%272%27 height=%273%27 fill=%27%23F2F3F5%27/%3E%3C/svg%3E" alt="" width="400" height="600"></div>
@@ -135,8 +137,38 @@
         <p class="seats-line">Seats <b id="seats-list"></b></p>
         <p class="muted" id="qty-note" style="font-size:.9375rem"></p>
         <p class="state" id="hold-state" hidden><svg class="icon"><use href="#i-check"/></svg><span></span></p>
+        <div class="authbox" id="authbox" hidden>
+          <h3>Sign in to finish your booking</h3>
+          <p>Your tickets go to your account so you can show them at the door. We'll bring you straight back here with your seats kept.</p>
+          <div class="actions"><a class="btn" id="auth-login" href="login.html">Sign in<svg class="icon"><use href="#i-arrow"/></svg></a><a class="btn btn--ghost" id="auth-signup" href="login.html?mode=signup">Create account</a><button class="btn btn--ghost" type="button" id="auth-guest">Continue as guest</button></div>
+        </div>
       </div>
       <div class="summary" id="summary" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<section class="course" id="payment" aria-labelledby="pay-title" hidden>
+  <div class="wrap">
+    <div class="course__head"><div class="lead"><h2 id="pay-title">Payment</h2><p>Your seats are held. Choose how to pay; only the demo option completes in this study.</p></div></div>
+    <div class="tickets">
+      <div class="picker__row">
+        <div class="label">Method</div>
+        <div class="methods" role="radiogroup" aria-label="Payment method" id="methods">
+          <label class="method"><input type="radio" name="method" value="GCash"><span><b>GCash</b><small>Scan to pay with the GCash app</small></span></label>
+          <label class="method"><input type="radio" name="method" value="Maya"><span><b>Maya</b><small>Pay from your Maya wallet</small></span></label>
+          <label class="method"><input type="radio" name="method" value="Card"><span><b>Credit or debit card</b><small>Visa, Mastercard, JCB</small></span></label>
+          <label class="method method--demo"><input type="radio" name="method" value="bypass" checked><span><b>Bypass (demo)</b><small>Skips payment and goes straight to the receipt</small></span></label>
+        </div>
+        <div class="fgroup" id="guest-fields" hidden>
+          <label for="guest-name">Name for the ticket</label>
+          <input class="input" type="text" id="guest-name" placeholder="Your name" autocomplete="name">
+          <small class="msg" id="guest-name-msg"></small>
+        </div>
+        <p class="state" id="pay-state" hidden><svg class="icon"><use href="#i-info"/></svg><span></span></p>
+        <button class="btn" type="button" id="pay-btn">Pay and get tickets<svg class="icon"><use href="#i-arrow"/></svg></button>
+      </div>
+      <div class="summary" id="pay-summary" aria-live="polite"></div>
     </div>
   </div>
 </section>
@@ -171,7 +203,7 @@
         </div>
       </div>
       <div><h3>Watch</h3><ul><li><a href="movies.html">Now showing</a></li><li><a href="movies.html#soon">Coming soon</a></li><li><a href="experience.html">Screen formats</a></li><li><a href="cinemas.html">Find a cinema</a></li></ul></div>
-      <div><h3>Club</h3><ul><li><a href="index.html#club">Taracine Club</a></li><li><a href="index.html#club">Cinema Points</a></li><li><a href="login.html">Sign in</a></li><li><a href="#">Gift tickets</a></li></ul></div>
+      <div><h3>Club</h3><ul><li><a href="index.html#club">Taracine Club</a></li><li><a href="index.html#club">Cinema Points</a></li><li><a href="login.html">Sign in</a></li><li><a href="tickets.html">Your tickets</a></li></ul></div>
       <div><h3>Help</h3><ul><li><a href="#">Contact us</a></li><li><a href="#">FAQs</a></li><li><a href="#">Private screenings</a></li><li><a href="#">Advertise with us</a></li></ul></div>
     </div>
     <p class="notice"><svg class="icon"><use href="#i-info"/></svg><span>Portfolio study modeled on a national cinema chain's site structure. Cinemas, showtimes, prices and perks are fictional. Some titles are real releases listed on smcinema.com; their posters belong to their studios.</span></p>
@@ -183,7 +215,7 @@
   <a href="index.html" data-nav="home"><svg class="icon"><use href="#i-home"/></svg>Home</a>
   <a href="movies.html" data-nav="movies"><svg class="icon"><use href="#i-film"/></svg>Movies</a>
   <a href="cinemas.html" data-nav="cinemas"><svg class="icon"><use href="#i-pin"/></svg>Cinemas</a>
-  <a href="#" id="tab-tickets"><svg class="icon"><use href="#i-ticket"/></svg>Tickets</a>
+  <a href="tickets.html" id="tab-tickets" data-nav="tickets"><svg class="icon"><use href="#i-ticket"/></svg>Tickets</a>
   <a href="login.html" id="tab-account" data-nav="login"><svg class="icon"><use href="#i-user"/></svg>Account</a>
 </nav>
 
