@@ -189,19 +189,11 @@ button.chip:hover:not([aria-pressed="true"]) { background: var(--panel); }
 .cinema[aria-pressed="true"] .pick { background: var(--ink); color: #fff; border-color: var(--ink); }
 
 /* ---------- club ---------- */
-.club { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: 24px; align-items: stretch; }
-.club__card { background: var(--ink); color: #fff; border-radius: var(--r-lg); padding: 28px; display: flex; flex-direction: column; gap: 14px; }
-.club__card h3 { font-size: 1.5rem; }
-.club__card .price { font-size: 2.25rem; font-weight: 600; letter-spacing: -0.02em; }
-.club__card .price small { font-size: 0.9375rem; font-weight: 400; color: #B8BCC4; margin-left: 6px; }
-.club__card ul { display: grid; gap: 10px; color: #E6E8EC; }
-.club__card li { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start; }
-.club__card li .icon { color: var(--accent); margin-top: 2px; }
-.club__card .btn { align-self: flex-start; margin-top: 6px; }
-.club__points { background: var(--panel); border-radius: var(--r-lg); padding: 28px; display: flex; flex-direction: column; gap: 12px; }
-.club__points h3 { font-size: 1.25rem; }
-.club__points p { color: var(--mid); }
-.club__points .big { font-size: 2rem; font-weight: 600; color: var(--ink); letter-spacing: -0.02em; }
+.extras { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: stretch; }
+.extras__card { background: var(--panel); border-radius: var(--r-lg); padding: 28px; display: flex; flex-direction: column; gap: 12px; }
+.extras__card h3 { font-size: 1.25rem; }
+.extras__card p { color: var(--mid); }
+.extras__card .big { font-size: 2rem; font-weight: 600; color: var(--ink); letter-spacing: -0.02em; }
 
 /* ---------- film detail ---------- */
 .film { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 32px; padding: 24px 0 32px; align-items: start; }
@@ -345,7 +337,7 @@ body[data-bar="true"] { padding-bottom: 92px; }
   .tile__open { opacity: 1; top: 14px; right: 14px; }
   .rail { grid-auto-columns: 150px; }
   .cinemas { grid-template-columns: 1fr; }
-  .club { grid-template-columns: 1fr; }
+  .extras { grid-template-columns: 1fr; }
   .film { grid-template-columns: 1fr; gap: 20px; }
   .film__art { max-width: 200px; }
   .dates { grid-template-columns: repeat(4, minmax(0, 1fr)); }
@@ -572,3 +564,17 @@ button.link { background: none; border: 0; padding: 0; font: inherit; cursor: po
   .doc { border: 0; border-radius: 0; page-break-after: always; }
 }
 .doc__bar b.many { font-size: 1.25rem; line-height: 1.2; }
+
+/* ---------- profile modal ---------- */
+.modal { border: 0; padding: 0; background: transparent; max-width: min(440px, calc(100% - 32px)); width: 100%; }
+.modal::backdrop { background: rgba(15, 17, 21, 0.45); }
+.modal__card { background: var(--bg); border-radius: var(--r-lg); padding: 24px; display: grid; gap: 16px; border: 1px solid var(--line); }
+.modal__head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.modal__head h2 { font-size: 1.375rem; }
+.modal__head p { font-size: 0.9375rem; margin-top: 2px; }
+.modal__close { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: var(--bg); display: grid; place-items: center; color: var(--ink); }
+.modal__close:hover { background: var(--panel); }
+.modal__actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.footer__grid { grid-template-columns: 1.4fr 1fr 1fr; }
+@media (max-width: 1100px) { .footer__grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 820px) { .footer__grid { grid-template-columns: 1fr; } }

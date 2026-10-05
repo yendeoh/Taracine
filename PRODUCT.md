@@ -28,16 +28,16 @@ Same information architecture as a national cinema chain (featured banners, Now 
 
 Reference site structure (SM Cinema, captured 2026-10-03):
 
-- Global nav: Home, Movies, Cinemas, Membership Upgrade, Cinema Points, Experience; Sign in / Sign up.
+- Global nav on the reference: Home, Movies, Cinemas, Membership Upgrade, Cinema Points, Experience; Sign in / Sign up. Taracine's nav: Home, Movies, Cinemas, Experience, Tickets; Sign in.
 - Home: hero banner carousel ("Featured content"), skyscraper promo slot, Now showing / Coming soon tabs over a poster grid (poster, title, censor-rating badge, Play trailer), footer banner, footer nav, socials, cookie notice.
 - Movies: same tabs and poster grid, page heading "Movies".
 - Cinemas: "Search for your cinema", list of branches with full addresses.
 - Film detail: rating badge, poster, Runtime, Release date, Genres, Censor rating description, Cast, Synopsis; "Showtimes" with a cinema picker ("Where would you like to see the movie?") and a scrolling date strip (e.g. "Tue 6 Oct").
 - Experience: IMAX, ScreenX, Directors Club, Regular Cinema, Event Screen, Snack Time.
-- Membership: Premium Member 1 Year, PHP 1,200.00; perks include free popcorn and drink upgrade per visit, free birth-month ticket, double points; 1 point = 1 peso.
+- Membership: Premium Member 1 Year, PHP 1,200.00 on the reference site. Taracine does not carry a club or points programme; the user removed it on 2026-10-05.
 - Seat picker exists on the booking flow.
 
-Built surfaces: Home, Movies, Film detail (showtimes → live seat map → hold → sign-in prompt or guest → payment → receipt), Cinemas, Experience, Sign in / Create account (DummyJSON), Tickets (receipts). Membership page and concessions remain unbuilt.
+Built surfaces: Home, Movies, Film detail (showtimes → live seat map → hold → sign-in prompt or guest → payment → receipt), Cinemas, Experience, Sign in / Create account (DummyJSON), Tickets (receipts). Concessions remain unbuilt; there is no membership/club programme by the user's decision. Signed-in users get a profile modal (edit username via DummyJSON, log out).
 
 ## Capabilities and Constraints
 

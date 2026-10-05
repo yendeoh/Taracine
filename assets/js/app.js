@@ -36,6 +36,35 @@
   if (signIn && user) signIn.innerHTML = `<svg class="icon"><use href="#i-user"/></svg>Hi, ${user.name}`;
   const tabAcc = $("#tab-account"); if (tabAcc && user) tabAcc.innerHTML = `<svg class="icon"><use href="#i-user"/></svg>${user.name}`;
 
+  // ----- profile modal: edit the username, log out (opens from the name pill or the Account tab when signed in) -----
+  const profile = $("#profile-modal");
+  if (profile && user) {
+    const unameInput = $("#profile-username"), pState = $("#profile-state"), pMsg = $("#profile-username-msg");
+    function openProfile(e) {
+      e.preventDefault();
+      $("#profile-email").textContent = `${accountName(user)}${user.email ? ` · ${user.email}` : ""}`;
+      unameInput.value = user.username || ""; pState.hidden = true; pMsg.className = "msg";
+      profile.showModal(); unameInput.focus();
+    }
+    [signIn, tabAcc].forEach(el => el && el.addEventListener("click", openProfile));
+    $("#profile-close").addEventListener("click", () => profile.close());
+    profile.addEventListener("click", e => { if (e.target === profile) profile.close(); });   // click on the backdrop closes
+    /* Lesson: async/await + try...catch with a real request; the UI prints its state inline. */
+    $("#profile-save").addEventListener("click", async () => {
+      const v = unameInput.value.trim();
+      if (v.length < 3 || !/^[A-Za-z0-9_.]+$/.test(v)) { pMsg.textContent = "Use at least 3 letters, numbers, dots or underscores."; pMsg.className = "msg error"; unameInput.classList.add("invalid"); return; }
+      unameInput.classList.remove("invalid"); pMsg.className = "msg";
+      pState.hidden = false; pState.className = "state state--info"; pState.innerHTML = `<svg class="icon"><use href="#i-clock"/></svg><span>Saving…</span>`;
+      let updated;
+      try { updated = await D.updateUsername(user, v); pState.className = "state"; pState.innerHTML = `<svg class="icon"><use href="#i-check"/></svg><span>Username updated to @${updated.username}.</span>`; }
+      catch (error) { updated = { ...user, username: v }; pState.className = "state state--warn"; pState.innerHTML = `<svg class="icon"><use href="#i-info"/></svg><span>Saved on this device only: ${error.message}</span>`; }
+      user = updated;
+      D.store.setUser(user, !!localStorage.getItem("taracine.user"));
+      $("#profile-email").textContent = `${accountName(user)}${user.email ? ` · ${user.email}` : ""}`;
+    });
+    $("#profile-logout").addEventListener("click", () => { D.store.clearUser(); profile.close(); location.href = "index.html"; });
+  }
+
   // ----- shell -----
   $$("[data-nav]").forEach(a => { if (a.dataset.nav === page) a.setAttribute("aria-current", "page"); });
   function inlineNote(el, text) { const old = el.innerHTML; el.textContent = text; setTimeout(() => el.innerHTML = old, 2200); }
@@ -379,7 +408,7 @@
     function paintSessions() {
       const c = cinema();
       if (film.status === "soon") {
-        sessionsEl.innerHTML = `<div class="empty"><h3>Opens ${fmtRelease(film.release)}</h3><p>Tickets go on sale one week before opening. Club members book first.</p><a class="btn btn--ghost btn--sm" href="movies.html">See what's showing now</a></div>`;
+        sessionsEl.innerHTML = `<div class="empty"><h3>Opens ${fmtRelease(film.release)}</h3><p>Tickets go on sale one week before opening.</p><a class="btn btn--ghost btn--sm" href="movies.html">See what's showing now</a></div>`;
         legend.hidden = true; paintTickets(); return;
       }
       const groups = D.sessions(film.id, myCinema, dateIso);
@@ -655,7 +684,7 @@
       const signup = mode === "signup";
       nameFields.hidden = !signup;
       $("#login-h1").textContent = signup ? "Create account" : "Sign in";
-      $("#login-sub").textContent = signup ? "Your tickets and Cinema Points live in one place." : (params.get("next") ? "Sign in to finish your booking. Your seats are kept while you do." : "Members book first and earn Cinema Points on every seat.");
+      $("#login-sub").textContent = signup ? "Your tickets live in one place, with your name on every one." : (params.get("next") ? "Sign in to finish your booking. Your seats are kept while you do." : "Hold seats and keep your tickets in one place.");
       $("#email-label").textContent = signup ? "Email Address" : "Email or username";
       email.placeholder = signup ? "Enter email" : "Enter email or username";
       email.autocomplete = signup ? "email" : "username";

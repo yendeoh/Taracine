@@ -539,3 +539,7 @@ The orange ration is unchanged: the only orange on the sign-in page is the Login
 ## Online ticket document (replaces the receipt card)
 
 `.doc` is a printed e-ticket rendered on white, deliberately a document rather than a UI card: centred brand and "Taracine Online Ticket" title, operator and cinema address, a monospace fiscal block, then one `.doc__ticket` per booking (all seats on the Seat bar, quantity in Ord.). Each ticket has a label/value grid (movie at 1.5rem 700), a 120px dashed blank QR area, a 160×54 barcode, two full-width black bars (`.doc__bar`: Screen, Seat) with 2.25rem white values, and a tabular amount list with a 2px rule above Amt due. The `--panel` footer holds the reference and Cancel, or the locked reason once the 12-hour window has closed. Print styles hide the chrome and break pages per booking.
+
+## Profile modal (added) and Club removed
+
+The one modal in the system: a native `<dialog>` (`.modal`) with a 45% ink backdrop and a 24px white card: heading + email line, a username field with inline validation, a `.state` line for the save result, and Save / Log out buttons. It opens only from the signed-in name pill or the Account tab. The Club section, nav item and footer column were removed; the footer now has Watch, Account and Help columns.

@@ -20,6 +20,7 @@
   <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 22s7-6.5 7-13a7 7 0 0 0-14 0c0 6.5 7 13 7 13z"/><circle cx="12" cy="9" r="2.5"/></symbol>
   <symbol id="i-ticket" viewBox="0 0 24 24"><path d="M3 9V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a3 3 0 0 0 0 6v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a3 3 0 0 0 0-6z"/><path d="M13 5v14"/></symbol>
   <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
   <symbol id="i-chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
   <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
   <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></symbol>
@@ -50,7 +51,6 @@
       <a href="movies.html" data-nav="movies">Movies</a>
       <a href="cinemas.html" data-nav="cinemas">Cinemas</a>
       <a href="experience.html" data-nav="experience">Experience</a>
-      <a href="index.html#club" data-nav="club">Club</a>
       <a href="tickets.html" data-nav="tickets">Tickets</a>
     </nav>
     <div class="topbar__right">
@@ -115,7 +115,7 @@
         </div>
       </div>
       <div><h3>Watch</h3><ul><li><a href="movies.html">Now showing</a></li><li><a href="movies.html#soon">Coming soon</a></li><li><a href="experience.html">Screen formats</a></li><li><a href="cinemas.html">Find a cinema</a></li></ul></div>
-      <div><h3>Club</h3><ul><li><a href="index.html#club">Taracine Club</a></li><li><a href="index.html#club">Cinema Points</a></li><li><a href="login.html">Sign in</a></li><li><a href="tickets.html">Your tickets</a></li></ul></div>
+      <div><h3>Account</h3><ul><li><a href="login.html">Sign in</a></li><li><a href="login.html?mode=signup">Create account</a></li><li><a href="tickets.html">Your tickets</a></li></ul></div>
       <div><h3>Help</h3><ul><li><a href="#">Contact us</a></li><li><a href="#">FAQs</a></li><li><a href="#">Private screenings</a></li><li><a href="#">Advertise with us</a></li></ul></div>
     </div>
     <p class="notice"><svg class="icon"><use href="#i-info"/></svg><span>Portfolio study modeled on a national cinema chain's site structure. Cinemas, showtimes, prices and perks are fictional. Some titles are real releases listed on smcinema.com; their posters belong to their studios.</span></p>
@@ -130,6 +130,25 @@
   <a href="tickets.html" id="tab-tickets" data-nav="tickets"><svg class="icon"><use href="#i-ticket"/></svg>Tickets</a>
   <a href="login.html" id="tab-account" data-nav="login"><svg class="icon"><use href="#i-user"/></svg>Account</a>
 </nav>
+
+<dialog class="modal" id="profile-modal" aria-labelledby="profile-title">
+  <form method="dialog" class="modal__card" id="profile-form">
+    <div class="modal__head">
+      <div><h2 id="profile-title">Your account</h2><p class="muted" id="profile-email"></p></div>
+      <button class="modal__close" type="button" id="profile-close" aria-label="Close"><svg class="icon"><use href="#i-close"/></svg></button>
+    </div>
+    <div class="fgroup">
+      <label for="profile-username">Username</label>
+      <input class="input" type="text" id="profile-username" autocomplete="username" minlength="3" maxlength="24" pattern="[A-Za-z0-9_.]+">
+      <small class="msg" id="profile-username-msg">Letters, numbers, dots and underscores. Saved through dummyjson.com.</small>
+    </div>
+    <p class="state" id="profile-state" hidden><svg class="icon"><use href="#i-info"/></svg><span></span></p>
+    <div class="modal__actions">
+      <button class="btn" type="button" id="profile-save">Save changes<svg class="icon"><use href="#i-arrow"/></svg></button>
+      <button class="btn btn--ghost" type="button" id="profile-logout">Log out</button>
+    </div>
+  </form>
+</dialog>
 
 <script src="assets/js/data.js"></script>
 <script src="assets/js/app.js"></script>

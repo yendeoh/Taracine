@@ -449,6 +449,14 @@ window.TARACINE = (function () {
     if (!r.ok) throw new Error(data.message || "Could not create the account.");
     return { id: data.id, username: data.username, name: data.firstName, lastName: data.lastName, email: data.email, image: "", token: null, source: "dummyjson-new" };
   }
+  async function updateUsername(u, username) {
+    // DummyJSON simulates the update and echoes the record back; new accounts (ids it never stored) return 404,
+    // so those are kept locally only.
+    const r = await fetch(`${API}/users/${u.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username }) });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.message || "Could not update the username.");
+    return { ...u, username: data.username || username };
+  }
   // The seat hold and the payment are simulated with a Promise and a timer, as in the lesson's login example.
   function holdSeats(seats) {
     return new Promise((resolve, reject) => {
@@ -490,5 +498,5 @@ window.TARACINE = (function () {
 
   try { localStorage.removeItem("taracine.bookings"); } catch (e) {}
 
-  return { Screen, screens, films, formats, cinemas, ratingDescriptions, sessions, loginUser, registerUser, holdSeats, payBooking, makeRef, store, fmtTime, isoDate, peso, hash };
+  return { Screen, screens, films, formats, cinemas, ratingDescriptions, sessions, loginUser, registerUser, updateUsername, holdSeats, payBooking, makeRef, store, fmtTime, isoDate, peso, hash };
 })();
