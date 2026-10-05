@@ -479,31 +479,36 @@
       authbox.scrollIntoView({ behavior: "smooth", block: "center" });
     }
     $("#auth-guest").addEventListener("click", () => { guest = true; authbox.hidden = true; D.store.setPending(null); hold(); });
-    $("#guest-name").addEventListener("input", () => { if (holdState === "held") paintPayment(); });
 
     // ----- payment (step 4) -----
     const paySec = $("#payment"), payBtn = $("#pay-btn"), payState = $("#pay-state"), paySummary = $("#pay-summary"), guestFields = $("#guest-fields"), s4 = $("#step-4");
+    const guestNameInput = $("#guest-name");
+    try { const saved = sessionStorage.getItem("taracine.guestName"); if (saved && !guestNameInput.value) guestNameInput.value = saved; } catch (e) {}
+    function guestName() { return guestNameInput.value.trim(); }
+    guestNameInput.addEventListener("input", () => { try { sessionStorage.setItem("taracine.guestName", guestName()); } catch (e) {} if (holdState === "held") paintPayment(); });
     function paintPayment() {
       if (holdState !== "held") { paySec.hidden = true; s4.removeAttribute("aria-current"); return; }
       const F = D.formats[chosen.format];
+      payBtn.disabled = paying || (!user && !guestName());
+      payBtn.innerHTML = (!user && !guestName()) ? `Enter a name to continue<svg class="icon"><use href="#i-arrow"/></svg>` : `Pay and get tickets<svg class="icon"><use href="#i-arrow"/></svg>`;
       paySec.hidden = false; s4.setAttribute("aria-current", "step"); $("#step-3").removeAttribute("aria-current"); $("#step-3").classList.add("done"); $("#step-3").querySelector("b").innerHTML = `<svg class="icon"><use href="#i-check"/></svg>`;
       guestFields.hidden = !!user;
-      paySummary.innerHTML = `<div class="row"><span>Film</span><b>${film.title}</b></div><div class="row"><span>Cinema</span><b>${cinema().name}</b></div><div class="row"><span>When</span><b>${fmtDay(dateIso)} · ${D.fmtTime(chosen.h, chosen.m)}</b></div><div class="row"><span>Seats</span><b>${seats.join(", ")} · ${F.name}</b></div><div class="row"><span>Booked as</span><b>${user ? accountName(user) : ($("#guest-name").value.trim() || "Guest")}</b></div><div class="row total"><span>Total</span><b>${D.peso(F.priceFor(seats.length))}</b></div>`;
+      paySummary.innerHTML = `<div class="row"><span>Film</span><b>${film.title}</b></div><div class="row"><span>Cinema</span><b>${cinema().name}</b></div><div class="row"><span>When</span><b>${fmtDay(dateIso)} · ${D.fmtTime(chosen.h, chosen.m)}</b></div><div class="row"><span>Seats</span><b>${seats.join(", ")} · ${F.name}</b></div><div class="row"><span>Booked as</span><b>${user ? accountName(user) : (guestName() || "Guest · enter a name")}</b></div><div class="row total"><span>Total</span><b>${D.peso(F.priceFor(seats.length))}</b></div>`;
     }
     /* Lesson: Async/Await + try...catch again. payBooking() rejects for every method except "bypass", which is the
        demonstration path to the receipt. The booking is stored in this browser and shown on tickets.html. */
     payBtn.addEventListener("click", async () => {
       if (paying) return;
       const method = (document.querySelector('input[name="method"]:checked') || {}).value || "bypass";
-      const nameInput = $("#guest-name"), nameMsg = $("#guest-name-msg");
-      if (!user && !nameInput.value.trim()) { nameMsg.textContent = "Add a name for the ticket."; nameMsg.className = "msg error"; nameInput.classList.add("invalid"); nameInput.focus(); return; }
+      const nameInput = guestNameInput, nameMsg = $("#guest-name-msg");
+      if (!user && !guestName()) { nameMsg.textContent = "Add a name for the ticket."; nameMsg.className = "msg error"; nameInput.classList.add("invalid"); nameInput.focus(); return; }
       nameMsg.textContent = ""; nameInput.classList.remove("invalid");
       paying = true; payBtn.disabled = true;
       payState.hidden = false; payState.className = "state state--info"; payState.innerHTML = `<svg class="icon"><use href="#i-clock"/></svg><span>Processing ${method === "bypass" ? "demo payment" : method}…</span>`;
       const F = D.formats[chosen.format];
       const showAt = new Date(`${dateIso}T${String(chosen.h).padStart(2, "0")}:${String(chosen.m).padStart(2, "0")}:00`).toISOString();
       const screenNo = (D.hash(`${film.id}|${myCinema}|${dateIso}|${chosen.h}:${chosen.m}`) % cinema().screens) + 1;
-      const booking = { filmId: film.id, filmTitle: film.title, poster: film.poster || `assets/posters/photos/${film.id}.jpg`, cinemaId: myCinema, cinemaName: cinema().name, cinemaAddress: `${cinema().address}, ${cinema().city}`, date: dateIso, time: D.fmtTime(chosen.h, chosen.m), showAt, screen: screenNo, format: F.name, pricePerSeat: F.price, rating: film.rating, censor: D.ratingDescriptions[film.rating], seats: [...seats], total: F.priceFor(seats.length), name: user ? accountName(user) : nameInput.value.trim(), username: user ? user.username : "", email: user ? user.email : "", userId: user ? user.id : null, guest: !user };
+      const booking = { filmId: film.id, filmTitle: film.title, poster: film.poster || `assets/posters/photos/${film.id}.jpg`, cinemaId: myCinema, cinemaName: cinema().name, cinemaAddress: `${cinema().address}, ${cinema().city}`, date: dateIso, time: D.fmtTime(chosen.h, chosen.m), showAt, screen: screenNo, format: F.name, pricePerSeat: F.price, rating: film.rating, censor: D.ratingDescriptions[film.rating], seats: [...seats], total: F.priceFor(seats.length), name: user ? accountName(user) : guestName(), username: user ? user.username : "", email: user ? user.email : "", userId: user ? user.id : null, guest: !user };
       try {
         const paid = await D.payBooking(booking, method);
         D.store.addBooking(paid); stopHold(); stopFeed(); D.store.setPending(null);
@@ -770,11 +775,12 @@
     function fmtDateTime(iso) { const d = new Date(iso); return `${String(d.getMonth() + 1).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")}/${d.getFullYear()}-${D.fmtTime(d.getHours(), d.getMinutes()).toLowerCase()}`; }
     function money(n) { return n.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 
-    function ticketHTML(b, seat, idx) {
-      const per = b.pricePerSeat || Math.round(b.total / b.seats.length);
-      const basic = per / 1.22, amTax = basic * 0.10, cTax = basic * 0.12;     // demo breakdown: amusement tax + VAT
-      const code = `${b.ref}-${String(idx + 1).padStart(2, "0")}`;
+    function ticketHTML(b) {
+      const qty = b.seats.length, gross = b.total;
+      const basic = gross / 1.22, amTax = basic * 0.10, cTax = basic * 0.12;   // demo breakdown: amusement tax + VAT
+      const code = b.ref;
       const d = showDate(b);
+      const seatList = b.seats.map(x => x.replace(/^([A-Z]+)(\d+)$/, "$1-$2")).join(", ");
       return `<section class="doc__ticket">
         <div class="doc__body">
           <div class="doc__kv">
@@ -783,7 +789,7 @@
             <span>Screening Date</span><b>${DAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}</b>
             <span>Screening Time</span><b>${b.time}</b>
             <span class="plain">${b.rating ? `${b.rating} · ${b.censor || ""}` : ""}</span>
-            <span>Ticket Type</span><b>${b.format} · Regular</b>
+            <span>Ticket Type</span><b>${b.format} · Regular × ${qty}</b>
             <span>Name</span><b>${ticketName(b)}</b>
           </div>
           <div class="doc__codes">
@@ -794,16 +800,16 @@
         </div>
         <div class="doc__bar"><span>Screen</span><b>Cinema ${b.screen || 1}</b></div>
         <div class="doc__amounts">
-          <span>Gross</span><span>${money(per)}</span>
-          <span>Ord.</span><span>1</span>
+          <span>Gross</span><span>${money(gross)}</span>
+          <span>Ord.</span><span>${qty} × ${money(b.pricePerSeat || gross / qty)}</span>
           <span>Discount</span><span>0.00</span>
-          <span>Net</span><span>${money(per)}</span>
+          <span>Net</span><span>${money(gross)}</span>
           <span>Basic</span><span>${money(basic)}</span>
           <span>Am. Tax</span><span>${money(amTax)}</span>
           <span>C. Tax</span><span>${money(cTax)}</span>
-          <span class="due">Amt due</span><span class="due">₱${money(per)}</span>
+          <span class="due">Amt due</span><span class="due">₱${money(gross)}</span>
         </div>
-        <div class="doc__bar"><span>Seat</span><b>${seat.replace(/^([A-Z]+)(\d+)$/, "$1-$2")}</b></div>
+        <div class="doc__bar"><span>Seat${qty > 1 ? "s" : ""}</span><b class="${qty > 3 ? "many" : ""}">${seatList}</b></div>
       </section>`;
     }
     function paint() {
@@ -823,12 +829,12 @@
           <span>Machine SN</span><span>${OPERATOR.sn}</span>
           <span>Trans. Date</span><span>${fmtDateTime(b.paidAt)}</span>
           <span>OR Number</span><span>${String(100000 + (D.hash(b.ref) % 899999)).padStart(8, "0")}</span>
-          <span>T/N</span><span>${b.ref}/${String(b.seats.length).padStart(3, "0")}</span>
+          <span>T/N</span><span>${b.ref}/001</span>
           <span>Payment</span><span>${b.method}</span>
           <span>Booked by</span><span>${ticketName(b)}${b.guest ? " (guest)" : b.username ? ` (@${b.username})` : ""}</span>
         </div>
-        ${b.seats.map((seat, idx) => ticketHTML(b, seat, idx)).join("")}
-        <div class="doc__foot"><span>Ref <b>${b.ref}</b> · ${b.seats.length} ticket${b.seats.length > 1 ? "s" : ""} · ₱${money(b.total)} total</span>
+        ${ticketHTML(b)}
+        <div class="doc__foot"><span>Ref <b>${b.ref}</b> · ${b.seats.length} seat${b.seats.length > 1 ? "s" : ""} · ₱${money(b.total)} total</span>
           ${canCancel(b) ? `<span>${b.ref === highlight ? "Just booked · " : ""}<button type="button" class="link" data-cancel="${b.ref}">Cancel booking</button> <span class="locked">(${cancelLabel(b)})</span></span>` : `<span class="locked">${cancelLabel(b)}</span>`}
         </div>
       </article>`).join("") : `<div class="empty"><h3>Nothing booked yet</h3><p>Your tickets will show up here after payment.</p><a class="btn btn--sm" href="movies.html">Browse movies</a></div>`;
