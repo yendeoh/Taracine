@@ -468,14 +468,17 @@ window.TARACINE = (function () {
   }
   function makeRef(b) { const h = hash(JSON.stringify([b.filmId, b.cinemaId, b.date, b.time, b.seats, Date.now()])); return "TRC-" + h.toString(36).toUpperCase().slice(0, 6).padStart(6, "0"); }
 
-  // bookings and the signed-in user live in this browser only
+  // the signed-in user lives in this browser; bookings live only for the current run (see below)
   const store = {
     user() { try { return JSON.parse(localStorage.getItem("taracine.user") || sessionStorage.getItem("taracine.user") || "null"); } catch (e) { return null; } },
     setUser(u, remember) { try { (remember ? localStorage : sessionStorage).setItem("taracine.user", JSON.stringify(u)); (remember ? sessionStorage : localStorage).removeItem("taracine.user"); } catch (e) {} },
     clearUser() { try { localStorage.removeItem("taracine.user"); sessionStorage.removeItem("taracine.user"); } catch (e) {} },
-    bookings() { try { return JSON.parse(localStorage.getItem("taracine.bookings") || "[]"); } catch (e) { return []; } },
-    addBooking(b) { const all = store.bookings(); all.unshift(b); try { localStorage.setItem("taracine.bookings", JSON.stringify(all)); } catch (e) {} },
-    removeBooking(ref) { try { localStorage.setItem("taracine.bookings", JSON.stringify(store.bookings().filter(b => b.ref !== ref))); } catch (e) {} },
+    // Receipts live only for the current run: sessionStorage survives page changes in this tab but is cleared when the
+    // tab or window closes, so re-running the site always starts with zero bookings.
+    bookings() { try { return JSON.parse(sessionStorage.getItem("taracine.bookings") || "[]"); } catch (e) { return []; } },
+    addBooking(b) { const all = store.bookings(); all.unshift(b); try { sessionStorage.setItem("taracine.bookings", JSON.stringify(all)); } catch (e) {} },
+    removeBooking(ref) { try { sessionStorage.setItem("taracine.bookings", JSON.stringify(store.bookings().filter(b => b.ref !== ref))); } catch (e) {} },
+    resetRun() { try { ["taracine.bookings", "taracine.pending", "taracine.guestName"].forEach(k => sessionStorage.removeItem(k)); localStorage.removeItem("taracine.bookings"); } catch (e) {} },
     pending() { try { return JSON.parse(sessionStorage.getItem("taracine.pending") || "null"); } catch (e) { return null; } },
     setPending(p) { try { if (p) sessionStorage.setItem("taracine.pending", JSON.stringify(p)); else sessionStorage.removeItem("taracine.pending"); } catch (e) {} }
   };
@@ -484,6 +487,8 @@ window.TARACINE = (function () {
   function pad(n) { return String(n).padStart(2, "0"); }
   function isoDate(d) { return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; }
   function peso(n) { return "₱" + n.toLocaleString("en-PH"); }
+
+  try { localStorage.removeItem("taracine.bookings"); } catch (e) {}
 
   return { Screen, screens, films, formats, cinemas, ratingDescriptions, sessions, loginUser, registerUser, holdSeats, payBooking, makeRef, store, fmtTime, isoDate, peso, hash };
 })();

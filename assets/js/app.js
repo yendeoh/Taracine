@@ -814,8 +814,8 @@
     }
     function paint() {
       const all = D.store.bookings();
-      $("#tickets-sub").textContent = all.length ? `${all.length} booking${all.length > 1 ? "s" : ""} made in this browser. Show a ticket's code at the door. Cancellations close 12 hours before the show.` : "No bookings yet. Pick a film and a time to get started.";
-      $("#print-tickets").hidden = !all.length;
+      $("#tickets-sub").textContent = all.length ? `${all.length} booking${all.length > 1 ? "s" : ""} from this run. Show a ticket's code at the door. Cancellations close 12 hours before the show. Closing the tab clears these receipts.` : "No bookings yet. Pick a film and a time to get started. Receipts last only for this run.";
+      $("#print-tickets").hidden = !all.length; $("#reset-run").hidden = !all.length;
       list.innerHTML = all.length ? all.map((b, i) => `<article class="doc ${b.ref === highlight ? "new" : ""}" data-ref="${b.ref}">
         <header class="doc__head">
           <div class="doc__brand"><i aria-hidden="true"></i>taracine</div>
@@ -837,7 +837,7 @@
         <div class="doc__foot"><span>Ref <b>${b.ref}</b> · ${b.seats.length} seat${b.seats.length > 1 ? "s" : ""} · ₱${money(b.total)} total</span>
           ${canCancel(b) ? `<span>${b.ref === highlight ? "Just booked · " : ""}<button type="button" class="link" data-cancel="${b.ref}">Cancel booking</button> <span class="locked">(${cancelLabel(b)})</span></span>` : `<span class="locked">${cancelLabel(b)}</span>`}
         </div>
-      </article>`).join("") : `<div class="empty"><h3>Nothing booked yet</h3><p>Your tickets will show up here after payment.</p><a class="btn btn--sm" href="movies.html">Browse movies</a></div>`;
+      </article>`).join("") : `<div class="empty"><h3>Nothing booked yet</h3><p>Your tickets will show up here after payment, and are cleared when you close the tab.</p><a class="btn btn--sm" href="movies.html">Browse movies</a></div>`;
       drawCodes();
     }
     function drawCodes() {
@@ -854,6 +854,7 @@
       D.store.removeBooking(b.ref); paint();
     });
     $("#print-tickets").addEventListener("click", () => window.print());
+    $("#reset-run").addEventListener("click", () => { D.store.resetRun(); paint(); });
     paint();
   }
 })();
